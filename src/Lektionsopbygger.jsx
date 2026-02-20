@@ -110,7 +110,7 @@ const MODULES_RAW = [
     sections: [
       { id: "9", title: "Manøvrer på køreteknisk anlæg", type: "both", selfStudy: true, highlightPractice: "4 obligatoriske lektioner på KTA",
         goals: ["9.1 Vejgreb og belæsning", "9.2 Hastighed og bremselængde", "9.3 Hindringer og slalom", "9.4 Genvinding af vejgreb", "9.5 Kørsel over høj vejkant"] },
-      { id: "7.22", title: "Afsluttende øvelseskørsel", type: "practice",
+      { id: "7.22", title: "Afsluttende øvelseskørsel", type: "practice", repeatable: true,
         goals: ["7.22.1 Bilens indretning mv.", "7.22.2 Trafikantadfærd", "7.22.3 Vejforhold", "Selvstændig planlægning"] },
     ],
   },
@@ -143,6 +143,7 @@ function buildItems(modules) {
           title: sec.title, goals: sec.goals || [],
           mustBeFirst: sec.mustBeFirst, selfStudy: sec.selfStudy,
           context: sec.context, highlight: sec.highlight,
+          repeatable: sec.repeatable || false,
         });
       }
     });
@@ -152,6 +153,11 @@ function buildItems(modules) {
 
 const ALL_ITEMS = buildItems(MODULES_RAW);
 const MODULES_MAP = Object.fromEntries(MODULES_RAW.map(m => [m.id, m]));
+
+// Lookup helper: supports repeatable item copies (uid with #N suffix)
+function findItem(uid) {
+  return ALL_ITEMS.find(i => i.uid === uid) || ALL_ITEMS.find(i => i.uid === uid.replace(/#\d+$/, ""));
+}
 
 // ─────────────────────────────────────────────────────────
 // VALIDATION ENGINE
@@ -169,7 +175,7 @@ function validateBlocks(blocks) {
   blocks.forEach((block, bIdx) => {
     block.items.forEach(uid => {
       allPlacedUids.add(uid);
-      const item = ALL_ITEMS.find(i => i.uid === uid);
+      const item = findItem(uid);
       if (!item) return;
       if (!placedByModule[item.moduleId]) placedByModule[item.moduleId] = [];
       placedByModule[item.moduleId].push({ blockIdx: bIdx, item, blockType: block.type });
@@ -177,13 +183,18 @@ function validateBlocks(blocks) {
     });
   });
 
-  // 0. Check: max 4 lessons for theory blocks, max 2/3/4 for practice
+  // 0. Check: max 3 lessons for theory/practice blocks, max 4 for KTA
   blocks.forEach((block, bIdx) => {
+    const isKTA = block.type === "practice" && block.items.some(uid => {
+      const it = findItem(uid);
+      return it && it.moduleId === 5 && it.sectionId === "9";
+    });
+    const maxLessons = isKTA ? 4 : 3;
     if (block.type === "theory" && block.lessons > 4) {
       errors.push(`"${block.name}" (blok ${bIdx + 1}): Max 4 teorilektioner pr. dag — du har sat ${block.lessons}.`);
     }
-    if (block.type === "practice" && block.lessons > 4) {
-      errors.push(`"${block.name}" (blok ${bIdx + 1}): Max 4 praktiske lektioner pr. dag (kun KTA) — du har sat ${block.lessons}.`);
+    if (block.type === "practice" && block.lessons > maxLessons) {
+      errors.push(`"${block.name}" (blok ${bIdx + 1}): Max ${maxLessons} praktiske lektioner pr. dag${isKTA ? "" : ""} — du har sat ${block.lessons}.`);
     }
   });
 
@@ -199,7 +210,7 @@ function validateBlocks(blocks) {
   blocks.forEach((block, bIdx) => {
     if (block.type !== "selfStudy") return;
     block.items.forEach(uid => {
-      const item = ALL_ITEMS.find(i => i.uid === uid);
+      const item = findItem(uid);
       if (!item) return;
       if (item.mode !== "theory") {
         errors.push(`"${block.name}" (blok ${bIdx + 1}): "${item.title}" — kun teorimål kan være selvstudium.`);
@@ -214,7 +225,7 @@ function validateBlocks(blocks) {
   // 1. Check: theory items only in theory/selfStudy blocks, practice only in practice
   blocks.forEach((block, bIdx) => {
     block.items.forEach(uid => {
-      const item = ALL_ITEMS.find(i => i.uid === uid);
+      const item = findItem(uid);
       if (!item) return;
       if (block.type === "theory" && item.mode === "practice") {
         errors.push(`Blok ${bIdx + 1}: "${item.title}" (praksis) kan ikke placeres i en teoriaften.`);
@@ -233,7 +244,7 @@ function validateBlocks(blocks) {
     if (item.mode === "practice") {
       // Find matching theory item
       const theoryUid = item.uid.replace(/-P$/, "-T");
-      const theoryItem = ALL_ITEMS.find(i => i.uid === theoryUid);
+      const theoryItem = findItem(theoryUid);
       if (!theoryItem) return;
 
       const practiceBlock = blocks.findIndex(b => b.items.includes(item.uid));
@@ -261,7 +272,7 @@ function validateBlocks(blocks) {
 
   // 3b. Check mustBeFirst items are at the TOP within their block
   blocks.forEach((block, bIdx) => {
-    const itemsInBlock = block.items.map(uid => ALL_ITEMS.find(i => i.uid === uid)).filter(Boolean);
+    const itemsInBlock = block.items.map(uid => findItem(uid)).filter(Boolean);
     let lastMustFirstIdx = -1;
     let firstNonMustFirstIdx = -1;
     itemsInBlock.forEach((item, idx) => {
@@ -305,7 +316,7 @@ function validateBlocks(blocks) {
     const theoryCount = blocks.reduce((sum, block) => {
       if (block.type !== "theory") return sum;
       const modItems = block.items.filter(uid => {
-        const item = ALL_ITEMS.find(i => i.uid === uid);
+        const item = findItem(uid);
         return item && item.moduleId === modId;
       });
       return sum + modItems.length; // each item ~ approximate
@@ -333,12 +344,12 @@ function validateBlocks(blocks) {
     let pCount = 0;
     blocks.forEach(block => {
       block.items.forEach(uid => {
-        const item = ALL_ITEMS.find(i => i.uid === uid);
+        const item = findItem(uid);
         if (!item || item.moduleId !== modId) return;
       });
       // Use block lessons
       const modItemsInBlock = block.items.filter(uid => {
-        const item = ALL_ITEMS.find(i => i.uid === uid);
+        const item = findItem(uid);
         return item && item.moduleId === modId;
       });
       if (modItemsInBlock.length > 0) {
@@ -364,7 +375,7 @@ function getModuleLessonCounts(blocks) {
     // Count items per module in this block
     const modItemCounts = {};
     block.items.forEach(uid => {
-      const item = ALL_ITEMS.find(i => i.uid === uid);
+      const item = findItem(uid);
       if (!item) return;
       modItemCounts[item.moduleId] = (modItemCounts[item.moduleId] || 0) + 1;
     });
@@ -394,14 +405,18 @@ function autoAdjustBlockLessons(blocks, blockId) {
   const targetBlock = blocks.find(b => b.id === blockId);
   if (!targetBlock || targetBlock.items.length === 0) return blocks;
 
-  const maxLessons = targetBlock.type === "selfStudy" ? MAX_SELF_STUDY_LESSONS : 4;
+  const isKTA = targetBlock.type === "practice" && targetBlock.items.some(uid => {
+    const it = findItem(uid);
+    return it && it.moduleId === 5 && it.sectionId === "9";
+  });
+  const maxLessons = targetBlock.type === "selfStudy" ? MAX_SELF_STUDY_LESSONS : targetBlock.type === "theory" ? 4 : (isKTA ? 4 : 3);
   const blockType = targetBlock.type;
   const itemMode = blockType === "selfStudy" ? "theory" : blockType;
 
   // Find which modules have items in this block
   const modulesInBlock = new Set();
   targetBlock.items.forEach(uid => {
-    const it = ALL_ITEMS.find(i => i.uid === uid);
+    const it = findItem(uid);
     if (it) modulesInBlock.add(it.moduleId);
   });
 
@@ -413,7 +428,9 @@ function autoAdjustBlockLessons(blocks, blockId) {
     const mod = MODULES_MAP[modId];
     const required = itemMode === "theory" ? mod.theory : mod.practice;
     const allModItems = ALL_ITEMS.filter(i => i.moduleId === modId && i.mode === itemMode);
-    const allModPlaced = allModItems.every(i => placedSet.has(i.uid));
+    const allModPlaced = allModItems.every(i =>
+      placedSet.has(i.uid) || (i.repeatable && [...placedSet].some(u => u.startsWith(i.uid + "#")))
+    );
 
     if (allModPlaced) {
       const counts = getModuleLessonCounts(blocks);
@@ -567,8 +584,27 @@ export default function Lektionsopbygger() {
     setBlocks(prev => prev.map(b => b.id === blockId ? { ...b, name } : b));
   };
 
-  // Get all placed UIDs
-  const placedUids = new Set(blocks.flatMap(b => b.items));
+  // Get all placed UIDs. Repeatable items are marked placed only when
+  // they have at least one copy placed AND the module's lesson requirement is met.
+  const placedUidsRaw = new Set(blocks.flatMap(b => b.items));
+  const moduleCounts = getModuleLessonCounts(blocks);
+  const placedUids = new Set([...placedUidsRaw].filter(uid => {
+    const item = findItem(uid);
+    if (item && item.repeatable && !uid.includes("#")) return false;
+    return true;
+  }));
+  // Add repeatable originals as placed when module requirement is satisfied
+  ALL_ITEMS.filter(i => i.repeatable).forEach(item => {
+    const hasCopy = [...placedUidsRaw].some(u => u.startsWith(item.uid + "#"));
+    if (hasCopy) {
+      const mod = MODULES_MAP[item.moduleId];
+      const required = item.mode === "practice" ? mod.practice : mod.theory;
+      const current = item.mode === "practice"
+        ? (moduleCounts[item.moduleId]?.practice || 0)
+        : (moduleCounts[item.moduleId]?.theory || 0);
+      if (current >= required) placedUids.add(item.uid);
+    }
+  });
 
   // Filter items for current module and mode
   const currentModule = MODULES_MAP[activeModule];
@@ -591,7 +627,7 @@ export default function Lektionsopbygger() {
 
     // Build custom drag ghost for multi-select
     if (isMulti && e) {
-      const items = [...selectedUids].map(u => ALL_ITEMS.find(i => i.uid === u)).filter(Boolean);
+      const items = [...selectedUids].map(u => findItem(u)).filter(Boolean);
       setGhostItems(items);
       // Need to wait for React to render the ghost before setDragImage
       // Use a pre-built offscreen element instead
@@ -631,20 +667,43 @@ export default function Lektionsopbygger() {
   };
   const onDragEnd = () => { setDragItem(null); setDragOverBlock(null); setGhostItems([]); };
 
+  // Generate next copy uid for a repeatable item
+  const nextRepeatUid = (baseUid) => {
+    const allPlaced = blocks.flatMap(b => b.items);
+    let n = 1;
+    while (allPlaced.includes(`${baseUid}#${n}`)) n++;
+    return `${baseUid}#${n}`;
+  };
+
   const onDropToBlock = (blockId, insertAtIndex) => {
     if (!dragItem) return;
 
-    const uidsToMove = selectedUids.has(dragItem) && selectedUids.size > 0
+    const rawUids = selectedUids.has(dragItem) && selectedUids.size > 0
       ? [...selectedUids]
       : [dragItem];
+
+    // For repeatable items dragged from pool (original uid), create a copy uid
+    const uidsToMove = rawUids.map(uid => {
+      const item = findItem(uid);
+      if (item && item.repeatable && !uid.includes("#")) {
+        return nextRepeatUid(uid);
+      }
+      return uid;
+    });
+    // Track which raw uids are repeatable originals (should not be removed from blocks)
+    const repeatableOriginals = new Set(rawUids.filter(uid => {
+      const item = findItem(uid);
+      return item && item.repeatable && !uid.includes("#");
+    }));
 
     let didAutoSort = false;
 
     setBlocks(prev => {
-      const uidsSet = new Set(uidsToMove);
+      // Only remove non-repeatable-original items from existing blocks
+      const toRemove = new Set(rawUids.filter(uid => !repeatableOriginals.has(uid)));
       const cleaned = prev.map(b => ({
         ...b,
-        items: b.items.filter(uid => !uidsSet.has(uid)),
+        items: b.items.filter(uid => !toRemove.has(uid)),
       }));
       let result = cleaned.map(b => {
         if (b.id === blockId) {
@@ -658,8 +717,8 @@ export default function Lektionsopbygger() {
             items = [...b.items, ...toAdd];
           }
           // Auto-sort: mustBeFirst items float to top
-          const mustFirst = items.filter(uid => { const it = ALL_ITEMS.find(i => i.uid === uid); return it && it.mustBeFirst; });
-          const rest = items.filter(uid => { const it = ALL_ITEMS.find(i => i.uid === uid); return !it || !it.mustBeFirst; });
+          const mustFirst = items.filter(uid => { const it = findItem(uid); return it && it.mustBeFirst; });
+          const rest = items.filter(uid => { const it = findItem(uid); return !it || !it.mustBeFirst; });
           const sorted = [...mustFirst, ...rest];
           if (sorted.some((uid, idx) => uid !== items[idx])) {
             didAutoSort = true;
@@ -704,24 +763,37 @@ export default function Lektionsopbygger() {
   const onDropToNewBlock = () => {
     if (!dragItem) return;
 
-    const uidsToMove = selectedUids.has(dragItem) && selectedUids.size > 0
+    const rawUids = selectedUids.has(dragItem) && selectedUids.size > 0
       ? [...selectedUids]
       : [dragItem];
 
-    const items = uidsToMove.map(u => ALL_ITEMS.find(i => i.uid === u)).filter(Boolean);
-    const theoryUids = uidsToMove.filter(u => { const it = ALL_ITEMS.find(i => i.uid === u); return it && it.mode === "theory"; });
-    const practiceUids = uidsToMove.filter(u => { const it = ALL_ITEMS.find(i => i.uid === u); return it && it.mode === "practice"; });
+    // For repeatable items from pool, create copy uids
+    const uidsToMove = rawUids.map(uid => {
+      const item = findItem(uid);
+      if (item && item.repeatable && !uid.includes("#")) {
+        return nextRepeatUid(uid);
+      }
+      return uid;
+    });
+    const repeatableOriginals = new Set(rawUids.filter(uid => {
+      const item = findItem(uid);
+      return item && item.repeatable && !uid.includes("#");
+    }));
+
+    const items = uidsToMove.map(u => findItem(u)).filter(Boolean);
+    const theoryUids = uidsToMove.filter(u => { const it = findItem(u); return it && it.mode === "theory"; });
+    const practiceUids = uidsToMove.filter(u => { const it = findItem(u); return it && it.mode === "practice"; });
 
     // Check if ALL theory items are selfStudy-eligible
-    const theoryItems = theoryUids.map(u => ALL_ITEMS.find(i => i.uid === u)).filter(Boolean);
+    const theoryItems = theoryUids.map(u => findItem(u)).filter(Boolean);
     const allSelfStudy = theoryItems.length > 0 &&
       theoryItems.every(it => it.selfStudy && SELF_STUDY_ALLOWED_SECTIONS.has(it.sectionId));
 
     setBlocks(prev => {
-      const uidsSet = new Set(uidsToMove);
+      const toRemove = new Set(rawUids.filter(uid => !repeatableOriginals.has(uid)));
       let cleaned = prev.map(b => ({
         ...b,
-        items: b.items.filter(uid => !uidsSet.has(uid)),
+        items: b.items.filter(uid => !toRemove.has(uid)),
       }));
 
       const newBlockIds = [];
@@ -752,14 +824,14 @@ export default function Lektionsopbygger() {
         }
       }
       if (practiceUids.length > 0) {
-        const pItems = practiceUids.map(u => ALL_ITEMS.find(i => i.uid === u)).filter(Boolean);
+        const pItems = practiceUids.map(u => findItem(u)).filter(Boolean);
         const pCount = cleaned.filter(b => b.type === "practice").length + 1;
 
         const hasKTA = pItems.some(it => it.moduleId === 5 && it.sectionId === "9");
         const hasManøvre = pItems.some(it => it.moduleId === 2 && it.sectionId === "2");
 
         let pName = `Køretime ${pCount}`;
-        let pLessons = Math.min(4, practiceUids.length);
+        let pLessons = Math.min(3, practiceUids.length);
 
         if (hasKTA && pItems.every(it => it.moduleId === 5 && it.sectionId === "9")) {
           pName = `KTA`;
@@ -789,7 +861,7 @@ export default function Lektionsopbygger() {
     });
 
     // Show toast for smart defaults
-    const pItems = uidsToMove.map(u => ALL_ITEMS.find(i => i.uid === u)).filter(Boolean);
+    const pItems = uidsToMove.map(u => findItem(u)).filter(Boolean);
     const hasKTA = pItems.some(it => it.mode === "practice" && it.moduleId === 5 && it.sectionId === "9");
     const hasManøvre = pItems.some(it => it.mode === "practice" && it.moduleId === 2 && it.sectionId === "2");
     if (hasKTA) showToast("🏎️ KTA-blok oprettet med 4 lektioner (obligatorisk krav iht. BEK 1150).", "info");
@@ -886,7 +958,6 @@ export default function Lektionsopbygger() {
   };
 
   const validation = validateBlocks(blocks);
-  const moduleCounts = getModuleLessonCounts(blocks);
 
   // Print PDF
   const printPlan = async () => {
@@ -1064,7 +1135,7 @@ export default function Lektionsopbygger() {
     const typeBg = { theory: [239, 246, 255], practice: [240, 253, 244], selfStudy: [245, 243, 255] };
 
     blocks.forEach((block, idx) => {
-      const items = block.items.map(uid => ALL_ITEMS.find(i => i.uid === uid)).filter(Boolean);
+      const items = block.items.map(uid => findItem(uid)).filter(Boolean);
       const modules = [...new Set(items.map(i => i.moduleId))].sort();
       const color = typeColor[block.type];
       const bg = typeBg[block.type];
@@ -1660,7 +1731,7 @@ export default function Lektionsopbygger() {
                   // Module filter
                   if (filterModule !== "all") {
                     const hasModuleItem = block.items.some(uid => {
-                      const item = ALL_ITEMS.find(i => i.uid === uid);
+                      const item = findItem(uid);
                       return item && item.moduleId === filterModule;
                     });
                     // Show block if it has items from this module OR is empty (so you can drag into it)
@@ -1782,7 +1853,7 @@ export default function Lektionsopbygger() {
                       // Predict what block(s) will be created
                       const uids = selectedUids.has(dragItem) && selectedUids.size > 0
                         ? [...selectedUids] : [dragItem];
-                      const ditems = uids.map(u => ALL_ITEMS.find(i => i.uid === u)).filter(Boolean);
+                      const ditems = uids.map(u => findItem(u)).filter(Boolean);
                       const tItems = ditems.filter(i => i.mode === "theory");
                       const pItems = ditems.filter(i => i.mode === "practice");
                       const allSS = tItems.length > 0 && pItems.length === 0 &&
@@ -1834,8 +1905,7 @@ export default function Lektionsopbygger() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
                     <span style={{ color: "#93C5FD" }}>📖 Teoriaften:</span> Max 4 lektioner/dag<br />
-                    <span style={{ color: "#86EFAC" }}>🚗 Køretime:</span> Max 2 lektioner/dag (normal)<br />
-                    <span style={{ color: "#FCD34D" }}>⭐ Motorvej/mørke/øvelsesplads:</span> Max 3 lektioner/dag<br />
+                    <span style={{ color: "#86EFAC" }}>🚗 Køretime:</span> Max 3 lektioner/dag<br />
                     <span style={{ color: "#F472B6" }}>🏎️ KTA:</span> Max 4 lektioner/dag
                   </div>
                   <div>
@@ -1908,7 +1978,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
   blocks.forEach((block, idx) => {
     const moduleIds = new Set();
     block.items.forEach(uid => {
-      const item = ALL_ITEMS.find(i => i.uid === uid);
+      const item = findItem(uid);
       if (item) moduleIds.add(item.moduleId);
     });
     // Assign to primary module (first found), or "unassigned"
@@ -2042,7 +2112,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
             const mod = MODULES_MAP[modId];
             const modBlocks = blocks.filter(block => {
               const itemModules = block.items.map(uid => {
-                const item = ALL_ITEMS.find(i => i.uid === uid);
+                const item = findItem(uid);
                 return item ? item.moduleId : null;
               }).filter(Boolean);
               return itemModules.includes(modId) || (block.items.length === 0);
@@ -2056,7 +2126,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
             const dedupedBlocks = blocks.filter(block => {
               if (block.items.length === 0) return modId === 1;
               const moduleIds = block.items.map(uid => {
-                const item = ALL_ITEMS.find(i => i.uid === uid);
+                const item = findItem(uid);
                 return item ? item.moduleId : 99;
               });
               return Math.min(...moduleIds) === modId;
@@ -2109,7 +2179,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                           {block.items.map(uid => {
-                            const item = ALL_ITEMS.find(i => i.uid === uid);
+                            const item = findItem(uid);
                             if (!item) return null;
                             const itemMod = MODULES_MAP[item.moduleId];
                             return (
@@ -2273,6 +2343,10 @@ function BlockCard({
   const colors = BLOCK_COLORS[block.type];
   const isDragOver = dragOverBlock === block.id && dragItem;
   const isBlockDragging = dragBlock === block.id;
+  const isKTA = block.type === "practice" && block.items.some(uid => {
+    const it = findItem(uid);
+    return it && it.moduleId === 5 && it.sectionId === "9";
+  });
   const [insertIndex, setInsertIndex] = useState(null);
 
   // Calculate insert index from mouse position over items area
@@ -2376,7 +2450,7 @@ function BlockCard({
               cursor: "pointer", outline: "none",
             }}
           >
-            {(block.type === "theory" ? [1, 2, 3, 4] : block.type === "selfStudy" ? [1, 2, 3, 4, 5, 6, 7] : [1, 2, 3, 4]).map(n => (
+            {(block.type === "theory" ? [1, 2, 3, 4] : block.type === "selfStudy" ? [1, 2, 3, 4, 5, 6, 7] : isKTA ? [1, 2, 3, 4] : [1, 2, 3]).map(n => (
               <option key={n} value={n}>{n}</option>
             ))}
           </select>
@@ -2402,7 +2476,7 @@ function BlockCard({
           </div>
         )}
         {block.items.map((uid, i) => {
-          const item = ALL_ITEMS.find(it => it.uid === uid);
+          const item = findItem(uid);
           if (!item) return null;
           const mod = MODULES_MAP[item.moduleId];
           const wrongType = (block.type === "theory" && item.mode === "practice") ||
