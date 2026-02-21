@@ -71,7 +71,7 @@ export const MODULES_RAW = [
     ],
   },
   {
-    id: 4, title: "Udvidet kørsel på vej", color: "#DC2626",
+    id: 4, title: "Udvidet kørsel på vej", color: "#E0599B",
     theory: 9, practice: 6, practiceNote: "heraf min. 1 i mørke", selfStudyAllowed: [10],
     sections: [
       { id: "7.4*", title: "Vognbaneskift (tæt trafik)", type: "practice", context: "Genoptaget fra M3" },

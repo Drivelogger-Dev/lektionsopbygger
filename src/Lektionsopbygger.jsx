@@ -1220,7 +1220,7 @@ export default function Lektionsopbygger() {
           <div>
             <h1 style={{
               fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em",
-              color: "#22C55E",
+              color: "rgb(21,160,72)",
               marginBottom: 2,
             }}>
               Forløbsplanlægger
