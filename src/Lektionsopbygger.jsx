@@ -1267,7 +1267,6 @@ export default function Lektionsopbygger() {
   };
 
   const [isMobile] = useState(() => window.innerWidth < 768);
-  const [copied, setCopied] = useState(false);
 
   if (isMobile) {
     return (
@@ -1289,23 +1288,20 @@ export default function Lektionsopbygger() {
           <p style={{ fontSize: 14, color: "#9CA3AF", lineHeight: 1.6, marginBottom: 24 }}>
             Forløbsplanlæggeren kan kun bruges på en computer med mus og tastatur.
           </p>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText("https://drivelogger.dk/planlaegger/");
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            }}
+          <p style={{ fontSize: 13, color: "#9CA3AF", marginBottom: 8 }}>
+            Åbn linket på en computer:
+          </p>
+          <div
             style={{
-              background: copied ? "#14532D" : "#1F2937",
-              color: copied ? "#86EFAC" : "#E5E7EB",
-              border: "1px solid " + (copied ? "#14532D" : "#374151"),
-              borderRadius: 10, padding: "12px 24px", fontSize: 14,
-              fontWeight: 600, cursor: "pointer", width: "100%",
-              transition: "all 0.2s",
+              background: "#1F2937", color: "#60A5FA",
+              border: "1px solid #374151", borderRadius: 10,
+              padding: "12px 24px", fontSize: 14, fontWeight: 600,
+              userSelect: "all", WebkitUserSelect: "all",
+              width: "100%", boxSizing: "border-box",
             }}
           >
-            {copied ? "✓ Link kopieret!" : "📋 Kopiér link"}
-          </button>
+            drivelogger.dk/planlaegger
+          </div>
         </div>
       </div>
     );
@@ -1344,9 +1340,9 @@ export default function Lektionsopbygger() {
       `}</style>
 
       {/* Header */}
-      <div style={{ padding: "24px 32px 16px", borderBottom: "1px solid #1A1F2E" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
+      <div style={{ padding: "16px 24px 12px", borderBottom: "1px solid #1A1F2E" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <div style={{ minWidth: 200 }}>
             <h1 style={{
               fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em",
               color: "rgb(71,150,100)",
@@ -1358,7 +1354,7 @@ export default function Lektionsopbygger() {
               Planlæg og strukturér dit undervisningsforløb efter BEK 1150 · Kategori B
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <div style={{ position: "relative" }}>
               <button className="btn" onClick={() => {
                 if (document.fullscreenElement) document.exitFullscreen();
