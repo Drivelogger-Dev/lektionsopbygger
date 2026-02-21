@@ -175,7 +175,7 @@ function validateBlocks(blocks) {
     }
   });
 
-  // 4. Check M3 gate: 7.1-7.3 + 7.6-7.8 practice must be placed before 7.4/7.10-7.15 practice
+  // 4. M3 regel: 7.1-7.3 + 7.6-7.8 praksis skal placeres før 7.4/7.10-7.15 praksis
   const mod3 = MODULES_MAP[3];
   if (mod3) {
     const gateIds = mod3.gateIds || [];
@@ -190,12 +190,12 @@ function validateBlocks(blocks) {
     const anyGateNotPlaced = gatePlaced.filter(i => i === -1);
 
     if (anyBlockedPlaced.length > 0 && anyGateNotPlaced.length > 0) {
-      errors.push("Modul 3: Alle gate-emner (7.1–7.3, 7.6–7.8) SKAL være placeret i praksis FØR kryds/rundkørsler (7.4, 7.10–7.15).");
+      errors.push("M3 regel: Alle emner (7.1–7.3, 7.6–7.8) SKAL være placeret i praksis FØR kryds/rundkørsler (7.4, 7.10–7.15).");
     } else if (anyBlockedPlaced.length > 0) {
       const maxGate = Math.max(...gatePlaced);
       const minBlocked = Math.min(...anyBlockedPlaced);
       if (maxGate > minBlocked) {
-        errors.push("Modul 3: Gate-emner (7.1–7.3, 7.6–7.8) praksis skal placeres i blokke FØR kryds/rundkørsler praksis.");
+        errors.push("M3 regel: Emner (7.1–7.3, 7.6–7.8) praksis skal placeres i blokke FØR kryds/rundkørsler praksis.");
       }
     }
   }
@@ -468,7 +468,7 @@ export default function Lektionsopbygger() {
   }, [showPlanMenu]);
 
   const addBlock = (type) => {
-    const names = { theory: "Teoriaften", practice: "Køretime", selfStudy: "Selvstudium" };
+    const names = { theory: "Teori", practice: "Kørsel", selfStudy: "Selvstudium" };
     const defaultLessons = { theory: 4, practice: 2, selfStudy: 1 };
     const count = blocks.filter(b => b.type === type).length + 1;
     setBlocks(prev => [...prev, {
@@ -725,7 +725,7 @@ export default function Lektionsopbygger() {
           cleaned = [...cleaned, {
             id: newId,
             type: "theory",
-            name: `Teoriaften ${tCount}`,
+            name: `Teori ${tCount}`,
             lessons: Math.min(4, theoryUids.length),
             items: theoryUids,
           }];
@@ -738,7 +738,7 @@ export default function Lektionsopbygger() {
         const hasKTA = pItems.some(it => it.moduleId === 5 && it.sectionId === "9");
         const hasManøvre = pItems.some(it => it.moduleId === 2 && it.sectionId === "2");
 
-        let pName = `Køretime ${pCount}`;
+        let pName = `Kørsel ${pCount}`;
         let pLessons = Math.min(3, practiceUids.length);
 
         if (hasKTA && pItems.every(it => it.moduleId === 5 && it.sectionId === "9")) {
@@ -1019,7 +1019,7 @@ export default function Lektionsopbygger() {
     doc.text("Blokke", M, y);
     y += 6;
 
-    const typeLabel = { theory: "Teoriaften", practice: "K\u00F8retime", selfStudy: "Selvstudium" };
+    const typeLabel = { theory: "Teori", practice: "K\u00F8retime", selfStudy: "Selvstudium" };
     const typeColor = { theory: [37, 99, 235], practice: [22, 163, 74], selfStudy: [124, 58, 237] };
     const typeBg = { theory: [239, 246, 255], practice: [240, 253, 244], selfStudy: [245, 243, 255] };
 
@@ -1182,10 +1182,10 @@ export default function Lektionsopbygger() {
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               marginBottom: 2,
             }}>
-              Lektionsopbygger
+              Forløbsplanlægger
             </h1>
             <p style={{ fontSize: 12, color: "#6B7280" }}>
-              Træk mål ind i teoriaftener og køretimer · Modulplan Kategori B 2026
+              Planlæg og strukturér dit undervisningsforløb efter BEK 1150 · Kategori B
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -1278,6 +1278,14 @@ export default function Lektionsopbygger() {
               )}
             </div>
 
+            <button className="btn" onClick={() => {
+              if (document.fullscreenElement) document.exitFullscreen();
+              else document.documentElement.requestFullscreen();
+            }} style={{
+              padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
+              border: "1px solid #333",
+            }}>⛶ Fuld skærm</button>
+
             <button className="btn" onClick={printPlan} style={{
               padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
               border: "1px solid #333",
@@ -1286,7 +1294,7 @@ export default function Lektionsopbygger() {
             <a href="#plangraf" className="btn" style={{
               padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#C4B5FD",
               border: "1px solid #333", textDecoration: "none", display: "inline-flex", alignItems: "center",
-            }}>📊 Forløbsgraf</a>
+            }}>📊 Forløbsoverblik</a>
 
             <button className="btn" onClick={() => setShowValidation(v => !v)} style={{
               padding: "8px 16px", fontSize: 12,
@@ -1526,11 +1534,11 @@ export default function Lektionsopbygger() {
                 <button className="btn" onClick={() => addBlock("theory")} style={{
                   padding: "10px 20px", fontSize: 13,
                   background: "linear-gradient(135deg, #1E3A5F, #1E40AF)", color: "#93C5FD",
-                }}>+ Teoriaften</button>
+                }}>+ Teori</button>
                 <button className="btn" onClick={() => addBlock("practice")} style={{
                   padding: "10px 20px", fontSize: 13,
                   background: "linear-gradient(135deg, #14532D, #166534)", color: "#86EFAC",
-                }}>+ Køretime</button>
+                }}>+ Kørsel</button>
                 <button className="btn" onClick={() => addBlock("selfStudy")} style={{
                   padding: "10px 20px", fontSize: 13,
                   background: "linear-gradient(135deg, #2E1A50, #5B21B6)", color: "#C4B5FD",
@@ -1756,9 +1764,9 @@ export default function Lektionsopbygger() {
                       let previewParts = [];
                       if (tItems.length > 0) {
                         if (allSS) previewParts.push(`📚 Selvstudium (${tItems.length} mål)`);
-                        else previewParts.push(`📖 Teoriaften (${tItems.length} mål)`);
+                        else previewParts.push(`📖 Teori (${tItems.length} mål)`);
                       }
-                      if (pItems.length > 0) previewParts.push(`🚗 Køretime (${pItems.length} mål)`);
+                      if (pItems.length > 0) previewParts.push(`🚗 Kørsel (${pItems.length} mål)`);
                       const previewText = previewParts.join(" + ");
 
                       const accentColor = allSS ? "#A78BFA" : tItems.length > 0 && pItems.length === 0 ? "#3B82F6" : pItems.length > 0 && tItems.length === 0 ? "#22C55E" : "#3B82F6";
@@ -1798,13 +1806,13 @@ export default function Lektionsopbygger() {
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <span style={{ color: "#93C5FD" }}>📖 Teoriaften:</span> Max 4 lektioner/dag<br />
-                    <span style={{ color: "#86EFAC" }}>🚗 Køretime:</span> Max 3 lektioner/dag<br />
+                    <span style={{ color: "#93C5FD" }}>📖 Teori:</span> Max 4 lektioner/dag<br />
+                    <span style={{ color: "#86EFAC" }}>🚗 Kørsel:</span> Max 3 lektioner/dag<br />
                     <span style={{ color: "#F472B6" }}>🏎️ KTA:</span> Max 4 lektioner/dag
                   </div>
                   <div>
                     <span style={{ color: "#FCA5A5" }}>⚡ Rækkefølge:</span> Teori FØR praksis altid<br />
-                    <span style={{ color: "#FCA5A5" }}>⚡ M3 gate:</span> 7.1–7.8 praksis FØR kryds<br />
+                    <span style={{ color: "#FCA5A5" }}>⚡ M3 regel:</span> 7.1–7.8 praksis FØR kryds<br />
                     <span style={{ color: "#C4B5FD" }}>📚 Selvstudium:</span> Max 7 lektioner total<br />
                     <span style={{ color: "#9CA3AF" }}>📅 Min. 14 undervisningsdage</span>
                   </div>
@@ -1882,7 +1890,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
   });
 
   const typeIcon = { theory: "📖", practice: "🚗", selfStudy: "📚" };
-  const typeLabel = { theory: "Teoriaften", practice: "Køretime", selfStudy: "Selvstudium" };
+  const typeLabel = { theory: "Teori", practice: "Kørsel", selfStudy: "Selvstudium" };
   const typeBg = { theory: "#0C1929", practice: "#0D1F12", selfStudy: "#150D22" };
   const typeAccent = { theory: "#3B82F6", practice: "#22C55E", selfStudy: "#A78BFA" };
 
@@ -1911,8 +1919,8 @@ function SummaryView({ blocks, moduleCounts, validation }) {
       {/* Overall stats grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 20 }}>
         {[
-          { label: "Teoriaftener", value: blocks.filter(b => b.type === "theory").length, sub: `${blocks.filter(b => b.type === "theory").reduce((s, b) => s + b.lessons, 0)} lektioner`, icon: "📖", accent: "#3B82F6" },
-          { label: "Køretimer", value: blocks.filter(b => b.type === "practice").length, sub: `${totalP} lektioner`, icon: "🚗", accent: "#22C55E" },
+          { label: "Teoriblokke", value: blocks.filter(b => b.type === "theory").length, sub: `${blocks.filter(b => b.type === "theory").reduce((s, b) => s + b.lessons, 0)} lektioner`, icon: "📖", accent: "#3B82F6" },
+          { label: "Kørselsblokke", value: blocks.filter(b => b.type === "practice").length, sub: `${totalP} lektioner`, icon: "🚗", accent: "#22C55E" },
           { label: "Selvstudium", value: blocks.filter(b => b.type === "selfStudy").length, sub: `${totalSS}/${MAX_SELF_STUDY_LESSONS} lektioner`, icon: "📚", accent: "#A78BFA" },
           { label: "I alt", value: totalAll, sub: `${blocks.length} blokke`, icon: "Σ", accent: "#9CA3AF" },
         ].map(s => (

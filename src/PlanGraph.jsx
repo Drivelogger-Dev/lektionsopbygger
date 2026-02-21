@@ -15,7 +15,7 @@ import dagre from "dagre";
 import { MODULES_RAW } from "./data.js";
 
 // ─────────────────────────────────────────────────────────
-// SHARED DATA (mirrors Lektionsopbygger)
+// SHARED DATA (mirrors Forløbsplanlægger)
 // ─────────────────────────────────────────────────────────
 
 function buildItems(modules) {
@@ -75,8 +75,8 @@ const BLOCK_TYPE_COLORS = {
 };
 
 const BLOCK_TYPE_LABELS = {
-  theory: "Teoriaften",
-  practice: "Køretime",
+  theory: "Teori",
+  practice: "Kørsel",
   selfStudy: "Selvstudium",
 };
 
@@ -165,8 +165,8 @@ function computeIntraModuleDeps(modId, modBlocks, blocks) {
     });
   }
 
-  // Rule 3: M3 gate system — gate PRACTICE must be completed before blocked items
-  // Only targets non-practice blocks (practice blocks get their deps from Rule 1 T→P matching)
+  // Rule 3: M3 regel — praksis fra 7.1-7.3, 7.6-7.8 skal gennemføres før øvrige M3-emner
+  // Kun teori/selvstudieblokke som targets (praksis-blokke får deps fra Rule 1 T→P matching)
   if (modId === 3) {
     const mod3 = MODULES_RAW.find(m => m.id === 3);
     if (mod3) {
@@ -969,13 +969,13 @@ export default function PlanGraph() {
             padding: "5px 12px", background: C.nodeBg, color: "#93C5FD",
             borderRadius: 6, textDecoration: "none", fontSize: 12,
             border: `1px solid ${C.border}`,
-          }}>&#8592; Lektionsopbygger</a>
+          }}>&#8592; Forløbsplanlægger</a>
 
           <span style={{
             fontSize: 15, fontWeight: 800, color: C.text,
             letterSpacing: "-0.02em",
           }}>
-            Forløbsgraf
+            Forløbsoverblik
           </span>
         </div>
 
@@ -1006,8 +1006,8 @@ export default function PlanGraph() {
           <div style={{ display: "flex", gap: 8, marginLeft: 8 }}>
             {[
               { label: "Modul", color: "#9CA3AF", border: true },
-              { label: "Teoriaften", color: C.theory },
-              { label: "Køretime", color: C.practice },
+              { label: "Teori", color: C.theory },
+              { label: "Kørsel", color: C.practice },
               { label: "Selvstudium", color: C.selfStudy },
             ].map(l => (
               <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -1033,14 +1033,14 @@ export default function PlanGraph() {
           <span style={{ fontSize: 48, opacity: 0.3 }}>📊</span>
           <span style={{ fontSize: 14, color: C.textMuted }}>
             {planNames.length === 0
-              ? "Ingen gemte planer fundet. Opret og gem en plan i Lektionsopbygger først."
+              ? "Ingen gemte planer fundet. Opret og gem en plan i Forløbsplanlægger først."
               : "Den valgte plan har ingen blokke."}
           </span>
           <a href="#" style={{
             padding: "8px 16px", background: C.nodeBg, color: "#93C5FD",
             borderRadius: 8, textDecoration: "none", fontSize: 13,
             border: `1px solid ${C.border}`,
-          }}>Gå til Lektionsopbygger</a>
+          }}>Gå til Forløbsplanlægger</a>
         </div>
       ) : (
         <GraphView blocks={blocks} />
