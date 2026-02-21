@@ -391,9 +391,21 @@ export default function Lektionsopbygger() {
   const [savedPlans, setSavedPlans] = useState(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
   });
+  const LAST_PLAN_KEY = "lektionsopbygger_lastPlan";
   const [showPlanMenu, setShowPlanMenu] = useState(false);
   const [planNameInput, setPlanNameInput] = useState("");
   const [currentPlanName, setCurrentPlanName] = useState(null);
+
+  // Auto-load last used plan on mount
+  useEffect(() => {
+    const lastName = localStorage.getItem(LAST_PLAN_KEY);
+    if (lastName && savedPlans[lastName]) {
+      const plan = savedPlans[lastName];
+      setBlocks(plan.blocks);
+      blockIdCounter.current = plan.blockIdCounter || (Math.max(0, ...plan.blocks.map(b => b.id)) + 1);
+      setCurrentPlanName(lastName);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const savePlan = (name) => {
     if (!name.trim()) return;
@@ -406,6 +418,7 @@ export default function Lektionsopbygger() {
     setSavedPlans(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     setCurrentPlanName(name.trim());
+    localStorage.setItem(LAST_PLAN_KEY, name.trim());
     setPlanNameInput("");
     setShowPlanMenu(false);
     showToast(`💾 "${name.trim()}" gemt`, "info");
@@ -417,6 +430,7 @@ export default function Lektionsopbygger() {
     setBlocks(plan.blocks);
     blockIdCounter.current = plan.blockIdCounter || (Math.max(0, ...plan.blocks.map(b => b.id)) + 1);
     setCurrentPlanName(name);
+    localStorage.setItem(LAST_PLAN_KEY, name);
     setShowPlanMenu(false);
     setSelectedUids(new Set());
     showToast(`📂 "${name}" indlæst`, "info");
@@ -428,7 +442,10 @@ export default function Lektionsopbygger() {
     delete updated[name];
     setSavedPlans(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    if (currentPlanName === name) setCurrentPlanName(null);
+    if (currentPlanName === name) {
+      setCurrentPlanName(null);
+      localStorage.removeItem(LAST_PLAN_KEY);
+    }
     showToast(`🗑 "${name}" slettet`, "info");
   };
 
@@ -1265,6 +1282,11 @@ export default function Lektionsopbygger() {
               padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
               border: "1px solid #333",
             }}>🖨 Eksportér</button>
+
+            <a href="#plangraf" className="btn" style={{
+              padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#C4B5FD",
+              border: "1px solid #333", textDecoration: "none", display: "inline-flex", alignItems: "center",
+            }}>📊 Forløbsgraf</a>
 
             <button className="btn" onClick={() => setShowValidation(v => !v)} style={{
               padding: "8px 16px", fontSize: 12,

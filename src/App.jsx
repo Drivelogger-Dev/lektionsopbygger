@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Lektionsopbygger from './Lektionsopbygger'
 import ModulFlow from './ModulFlow'
+import PlanGraph from './PlanGraph'
 
 function App() {
   const [page, setPage] = useState(window.location.hash)
@@ -12,6 +13,7 @@ function App() {
   }, [])
 
   if (page === '#flow') return <ModulFlow />
+  if (page === '#plangraf') return <PlanGraph />
   return <Lektionsopbygger />
 }
 
