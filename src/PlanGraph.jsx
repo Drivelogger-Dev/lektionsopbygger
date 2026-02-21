@@ -1,12 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   Handle,
   Position,
   useNodesState,
   useEdgesState,
+  useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import dagre from "dagre";
@@ -389,7 +391,7 @@ function buildGraph(blocks) {
 
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 40, ranksep: 70, marginx: 40, marginy: 40 });
+  g.setGraph({ rankdir: "BT", nodesep: 40, ranksep: 70, marginx: 40, marginy: 40 });
 
   // Exclude theory-exam from dagre layout — position it manually
   const dagreNodes = nodes.filter(n => n.id !== "theory-exam");
@@ -435,9 +437,12 @@ const SEC_TYPE_LABEL = { theory: "T", practice: "P", both: "T+P" };
 function ModuleNode({ data }) {
   const [expanded, setExpanded] = useState(false);
 
+  // Styres via data.onModuleClick fra onNodeClick — toggle kun hvis allerede fokuseret
   return (
     <div
-      onClick={() => setExpanded(!expanded)}
+      onClick={() => {
+        if (data.isFocused) setExpanded(!expanded);
+      }}
       style={{
         position: "relative",
         background: `${data.color}18`,
@@ -455,7 +460,7 @@ function ModuleNode({ data }) {
         transition: "box-shadow 0.15s",
       }}
     >
-      <Handle type="target" position={Position.Top} style={{ background: data.color, width: 8, height: 8 }} />
+      <Handle type="target" position={Position.Bottom} style={{ background: data.color, width: 8, height: 8 }} />
       {data.modId === 4 && <Handle id="right" type="source" position={Position.Right} style={{ background: data.color, width: 7, height: 7 }} />}
       <div style={{ fontSize: 16, fontWeight: 800, color: data.color }}>
         {data.label}
@@ -469,7 +474,7 @@ function ModuleNode({ data }) {
 
       {expanded && data.sections && (
         <div style={{
-          position: "absolute", top: MOD_NODE_H + 6, left: 0, right: 0,
+          position: "absolute", bottom: MOD_NODE_H + 6, left: 0, right: 0,
           background: "#141820", border: `1.5px solid ${data.color}60`, borderRadius: 10,
           padding: "10px 12px", textAlign: "left", zIndex: 50,
           boxShadow: `0 8px 28px rgba(0,0,0,0.6)`,
@@ -498,7 +503,7 @@ function ModuleNode({ data }) {
         </div>
       )}
 
-      <Handle id="bottom" type="source" position={Position.Bottom} style={{ background: data.color, width: 8, height: 8 }} />
+      <Handle id="bottom" type="source" position={Position.Top} style={{ background: data.color, width: 8, height: 8 }} />
     </div>
   );
 }
@@ -526,7 +531,7 @@ function BlockNode({ data }) {
         transition: "box-shadow 0.15s",
       }}
     >
-      <Handle type="target" position={Position.Top} style={{ background: typeColor, width: 7, height: 7 }} />
+      <Handle type="target" position={Position.Bottom} style={{ background: typeColor, width: 7, height: 7 }} />
 
       <div style={{
         fontSize: 12, fontWeight: 700, color: C.text,
@@ -550,7 +555,7 @@ function BlockNode({ data }) {
 
       {expanded && data.items && data.items.length > 0 && (
         <div style={{
-          position: "absolute", top: BLOCK_NODE_H + 6, left: 0, right: 0,
+          position: "absolute", bottom: BLOCK_NODE_H + 6, left: 0, right: 0,
           background: "#141820", border: `1.5px solid ${typeColor}60`, borderRadius: 10,
           padding: "10px 12px", textAlign: "left", zIndex: 50,
           boxShadow: `0 8px 28px rgba(0,0,0,0.6)`,
@@ -578,7 +583,7 @@ function BlockNode({ data }) {
         </div>
       )}
 
-      <Handle type="source" position={Position.Bottom} style={{ background: typeColor, width: 7, height: 7 }} />
+      <Handle type="source" position={Position.Top} style={{ background: typeColor, width: 7, height: 7 }} />
     </div>
   );
 }
@@ -611,7 +616,7 @@ function ExamNode() {
       </div>
       {expanded && (
         <div style={{
-          position: "absolute", top: EXAM_NODE_H + 6, left: 0, right: 0,
+          position: "absolute", bottom: EXAM_NODE_H + 6, left: 0, right: 0,
           background: "#141820", border: `1.5px solid ${C.theory}60`, borderRadius: 10,
           padding: "10px 12px", textAlign: "left", zIndex: 50,
           boxShadow: "0 8px 28px rgba(0,0,0,0.6)",
@@ -640,7 +645,7 @@ function FinalNode() {
       gap: 10,
       boxShadow: `0 6px 24px ${C.practice}25`,
     }}>
-      <Handle type="target" position={Position.Top} style={{ background: C.practice, width: 8, height: 8 }} />
+      <Handle type="target" position={Position.Bottom} style={{ background: C.practice, width: 8, height: 8 }} />
       <span style={{ fontSize: 22 }}>🏁</span>
       <div>
         <div style={{ fontSize: 15, fontWeight: 800, color: C.practice }}>Køreprøve</div>
@@ -661,24 +666,142 @@ const nodeTypes = {
 // GRAPH VIEW
 // ─────────────────────────────────────────────────────────
 
-function GraphView({ blocks }) {
-  const { initNodes, initEdges } = useMemo(() => {
+// Compute bounding box for a set of node IDs
+function getNodesBounds(nodes, ids) {
+  const subset = nodes.filter(n => ids.includes(n.id));
+  if (subset.length === 0) return null;
+  const SIZES = { moduleNode: { w: MOD_NODE_W, h: MOD_NODE_H }, blockNode: { w: BLOCK_NODE_W, h: BLOCK_NODE_H }, examNode: { w: EXAM_NODE_W, h: EXAM_NODE_H }, finalNode: { w: FINAL_NODE_W, h: FINAL_NODE_H } };
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  subset.forEach(n => {
+    const s = SIZES[n.type] || { w: 170, h: 64 };
+    minX = Math.min(minX, n.position.x);
+    minY = Math.min(minY, n.position.y);
+    maxX = Math.max(maxX, n.position.x + s.w);
+    maxY = Math.max(maxY, n.position.y + s.h);
+  });
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
+function GraphViewInner({ blocks }) {
+  const { initNodes, initEdges, moduleNodeIds } = useMemo(() => {
     const { nodes, edges } = buildGraph(blocks);
-    return { initNodes: nodes, initEdges: edges };
+    // Group node IDs by module for navigation
+    const moduleNodeIds = {};
+    nodes.forEach(n => {
+      const match = n.id.match(/^mod-(\d+)$/);
+      if (match) {
+        const modId = parseInt(match[1]);
+        if (!moduleNodeIds[modId]) moduleNodeIds[modId] = [];
+        moduleNodeIds[modId].push(n.id);
+      }
+    });
+    // Also include block nodes in their module group
+    nodes.forEach(n => {
+      const blockMatch = n.id.match(/^block-(\d+)$/);
+      if (blockMatch) {
+        const blockIdx = parseInt(blockMatch[1]);
+        const block = blocks[blockIdx];
+        if (block) {
+          block.items.forEach(uid => {
+            const item = findItem(uid);
+            if (item) {
+              if (!moduleNodeIds[item.moduleId]) moduleNodeIds[item.moduleId] = [];
+              if (!moduleNodeIds[item.moduleId].includes(n.id)) {
+                moduleNodeIds[item.moduleId].push(n.id);
+              }
+            }
+          });
+        }
+      }
+    });
+    // Special entries
+    const examNode = nodes.find(n => n.id === "theory-exam");
+    if (examNode) moduleNodeIds["exam"] = ["theory-exam"];
+    const finalNode = nodes.find(n => n.id === "final");
+    if (finalNode) moduleNodeIds["final"] = ["final"];
+
+    return { initNodes: nodes, initEdges: edges, moduleNodeIds };
   }, [blocks]);
 
-  const [nodes, , onNodesChange] = useNodesState(initNodes);
+  const [rawNodes, , onNodesChange] = useNodesState(initNodes);
   const [edges, , onEdgesChange] = useEdgesState(initEdges);
+  const { fitBounds } = useReactFlow();
+  const [activeNav, setActiveNav] = useState(1);
+  const [showHelp, setShowHelp] = useState(true);
+
+  // Injectér isFocused i modul-noder baseret på activeNav
+  const nodes = useMemo(() => rawNodes.map(n => {
+    const match = n.id.match(/^mod-(\d+)$/);
+    if (match) {
+      return { ...n, data: { ...n.data, isFocused: activeNav === parseInt(match[1]) } };
+    }
+    return n;
+  }), [rawNodes, activeNav]);
+  const hasInitialized = useRef(false);
+
+  const navigateTo = useCallback((key, nodeIds) => {
+    const bounds = getNodesBounds(nodes, nodeIds);
+    if (bounds) {
+      fitBounds({ ...bounds, y: bounds.y - bounds.height * 0.2 }, { padding: 0.8, duration: 800 });
+      setActiveNav(key);
+    }
+  }, [nodes, fitBounds]);
+
+  const navigateAll = useCallback(() => {
+    const allIds = nodes.map(n => n.id);
+    const bounds = getNodesBounds(nodes, allIds);
+    if (bounds) {
+      fitBounds(bounds, { padding: 0.25, duration: 800 });
+      setActiveNav("all");
+    }
+  }, [nodes, fitBounds]);
+
+  // Build nav items from active modules
+  const activeModules = MODULES_RAW.filter(m => moduleNodeIds[m.id] && moduleNodeIds[m.id].length > 0);
+
+  // Navigér til et modul med korrekt bounds (inkl. næste moduls node)
+  const navigateToModule = useCallback((modId) => {
+    if (!moduleNodeIds[modId]) return;
+    const bounds = getNodesBounds(nodes, moduleNodeIds[modId]);
+    if (!bounds) return;
+    const nextModNode = nodes.find(n => n.id === `mod-${modId + 1}`);
+    if (nextModNode) {
+      const nextTop = nextModNode.position.y;
+      if (bounds.y > nextTop) {
+        bounds.height += (bounds.y - nextTop);
+        bounds.y = nextTop;
+      }
+    }
+    fitBounds({ ...bounds, y: bounds.y - bounds.height * 0.05 }, { padding: 0.3, duration: 800 });
+    setActiveNav(modId);
+  }, [nodes, moduleNodeIds, fitBounds]);
+
+  // Start på Modul 1 ved load
+  const onInit = useCallback(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+    if (moduleNodeIds[1] && moduleNodeIds[1].length > 0) {
+      setTimeout(() => navigateToModule(1), 100);
+    }
+  }, [moduleNodeIds, navigateToModule]);
+
+  // Klik på modul-node i grafen → navigér som i panelet
+  const onNodeClick = useCallback((_, node) => {
+    const match = node.id.match(/^mod-(\d+)$/);
+    if (match) {
+      navigateToModule(parseInt(match[1]));
+    }
+  }, [navigateToModule]);
 
   return (
     <ReactFlow
+      onInit={onInit}
+      onNodeClick={onNodeClick}
       nodes={nodes}
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       nodeTypes={nodeTypes}
-      fitView
-      fitViewOptions={{ padding: 0.25 }}
       minZoom={0.15}
       maxZoom={2}
       proOptions={{ hideAttribution: true }}
@@ -689,7 +812,126 @@ function GraphView({ blocks }) {
         position="bottom-left"
         style={{ background: C.nodeBg, borderRadius: 8, border: `1px solid ${C.border}` }}
       />
+
+      {/* Navigation — til venstre */}
+      <div style={{
+        position: "absolute", top: 60, left: 16, zIndex: 10,
+      }}>
+        <div style={{
+          background: `${C.nodeBg}F0`, border: `1px solid ${C.border}`,
+          borderRadius: 10, padding: "10px 12px",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: C.text, marginBottom: 8 }}>
+            Navigation
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <button
+              onClick={navigateAll}
+              style={{
+                padding: "6px 10px", fontSize: 10, fontWeight: 600,
+                background: activeNav === "all" ? "#374151" : "transparent",
+                color: C.text, border: `1px solid ${C.border}`,
+                borderRadius: 6, cursor: "pointer", textAlign: "left",
+                transition: "background 0.15s",
+              }}
+            >
+              📊 Overblik
+            </button>
+            {moduleNodeIds["final"] && (
+              <button
+                onClick={() => navigateTo("final", moduleNodeIds["final"])}
+                style={{
+                  padding: "6px 10px", fontSize: 10, fontWeight: 600,
+                  background: activeNav === "final" ? `${C.practice}30` : "transparent",
+                  color: C.practice, border: `1px solid ${activeNav === "final" ? C.practice : C.border}`,
+                  borderRadius: 6, cursor: "pointer", textAlign: "left",
+                  transition: "all 0.15s",
+                }}
+              >
+                🏁 Køreprøve
+              </button>
+            )}
+            {moduleNodeIds["exam"] && (
+              <button
+                onClick={() => navigateTo("exam", moduleNodeIds["exam"])}
+                style={{
+                  padding: "6px 10px", fontSize: 10, fontWeight: 600,
+                  background: activeNav === "exam" ? `${C.theory}30` : "transparent",
+                  color: C.theory, border: `1px solid ${activeNav === "exam" ? C.theory : C.border}`,
+                  borderRadius: 6, cursor: "pointer", textAlign: "left",
+                  transition: "all 0.15s",
+                }}
+              >
+                📝 Teoriprøve
+              </button>
+            )}
+            {[...activeModules].reverse().map(mod => (
+              <button
+                key={mod.id}
+                onClick={() => navigateToModule(mod.id)}
+                style={{
+                  padding: "6px 10px", fontSize: 10, fontWeight: 600,
+                  background: activeNav === mod.id ? `${mod.color}30` : "transparent",
+                  color: mod.color, border: `1px solid ${activeNav === mod.id ? mod.color : C.border}`,
+                  borderRadius: 6, cursor: "pointer", textAlign: "left",
+                  transition: "all 0.15s",
+                }}
+              >
+                Modul {mod.id}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Forklaring — til højre */}
+      <div style={{
+        position: "absolute", top: 60, right: 16, zIndex: 10,
+      }}>
+        <div style={{
+          background: `${C.nodeBg}F0`, border: `1px solid ${C.border}`,
+          borderRadius: 10, padding: "14px 16px", maxWidth: 220,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+        }}>
+          <div
+            onClick={() => setShowHelp(h => !h)}
+            style={{ fontSize: 12, fontWeight: 700, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+          >
+            Sådan læser du grafen
+            <span style={{ fontSize: 10, color: C.textMuted, marginLeft: 8 }}>{showHelp ? "▲" : "▼"}</span>
+          </div>
+          {showHelp && (
+            <div style={{ fontSize: 10, color: C.textMuted, lineHeight: 1.6, marginTop: 8 }}>
+              <p style={{ margin: "0 0 6px" }}>
+                Diagrammet viser rækkefølgen for dit undervisningsforløb.
+                Start i <b style={{ color: C.text }}>bunden</b> og følg pilene opad.
+              </p>
+              <p style={{ margin: "0 0 6px" }}>
+                En <b style={{ color: C.text }}>pil</b> fra en blok til en anden betyder,
+                at den nederste blok skal gennemføres <b style={{ color: C.text }}>før</b> den øverste.
+              </p>
+              <p style={{ margin: "0 0 6px" }}>
+                <b style={{ color: C.text }}>⚡ = Skal først</b> — disse lektioner
+                skal afholdes før andre i samme modul.
+              </p>
+              <p style={{ margin: "0 0 2px" }}>
+                <b style={{ color: C.text }}>Klik</b> på en boks for at se detaljer
+                om lektionerne i den.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
     </ReactFlow>
+  );
+}
+
+function GraphView({ blocks }) {
+  return (
+    <ReactFlowProvider>
+      <GraphViewInner blocks={blocks} />
+    </ReactFlowProvider>
   );
 }
 
@@ -704,7 +946,10 @@ export default function PlanGraph() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
   });
   const planNames = Object.keys(savedPlans);
-  const [selectedPlan, setSelectedPlan] = useState(planNames.length > 0 ? planNames[planNames.length - 1] : null);
+  const lastPlan = localStorage.getItem("lektionsopbygger_lastPlan");
+  const [selectedPlan, setSelectedPlan] = useState(
+    lastPlan && savedPlans[lastPlan] ? lastPlan : planNames.length > 0 ? planNames[0] : null
+  );
 
   const blocks = selectedPlan && savedPlans[selectedPlan] ? savedPlans[selectedPlan].blocks : [];
   const hasBlocks = blocks.length > 0;
@@ -735,7 +980,7 @@ export default function PlanGraph() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {planNames.length > 1 && (
+          {planNames.length > 0 && (
             <select
               value={selectedPlan || ""}
               onChange={e => setSelectedPlan(e.target.value)}
