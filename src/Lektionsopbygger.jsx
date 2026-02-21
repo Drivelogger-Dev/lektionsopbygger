@@ -496,6 +496,82 @@ export default function Lektionsopbygger() {
     showToast(`🗑 "${name}" slettet`, "info");
   };
 
+  const exportPlan = () => {
+    const name = currentPlanName || "forløb";
+    const data = {
+      name,
+      blocks,
+      blockIdCounter: blockIdCounter.current,
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const snake = name.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9æøå_-]/g, "");
+    a.download = `${snake}.drivelogger`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`📤 "${name}" eksporteret`, "info");
+  };
+
+  const importPlan = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".drivelogger";
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (!data.blocks || !Array.isArray(data.blocks)) {
+            showToast("Ugyldig fil — ingen blokke fundet", "error");
+            return;
+          }
+          const importBlocks = data.blocks;
+          const counter = data.blockIdCounter || (Math.max(0, ...importBlocks.map(b => b.id)) + 1);
+          const name = data.name || file.name.replace(/\.drivelogger$/, "");
+          setBlocks(importBlocks);
+          blockIdCounter.current = counter;
+          setCurrentPlanName(name);
+          setPlanNameInput("");
+          setShowPlanMenu(false);
+          setSelectedUids(new Set());
+          // Auto-gem i listen
+          const plan = { blocks: importBlocks, blockIdCounter: counter, savedAt: new Date().toISOString() };
+          const updated = { ...savedPlans, [name]: plan };
+          setSavedPlans(updated);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+          localStorage.setItem(LAST_PLAN_KEY, name);
+          showToast(`📥 "${name}" importeret og gemt`, "info");
+        } catch {
+          showToast("Kunne ikke læse filen", "error");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
+  const renamePlan = (oldName, e) => {
+    e.stopPropagation();
+    const newName = prompt("Nyt navn:", oldName);
+    if (!newName || !newName.trim() || newName.trim() === oldName) return;
+    if (savedPlans[newName.trim()]) { showToast("Der findes allerede et forløb med det navn", "error"); return; }
+    const updated = { ...savedPlans };
+    updated[newName.trim()] = updated[oldName];
+    delete updated[oldName];
+    setSavedPlans(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    if (currentPlanName === oldName) {
+      setCurrentPlanName(newName.trim());
+      localStorage.setItem(LAST_PLAN_KEY, newName.trim());
+    }
+    showToast(`✏️ Omdøbt til "${newName.trim()}"`, "info");
+  };
+
   const duplicatePlan = () => {
     const baseName = currentPlanName || "Plan";
     let n = 1;
@@ -564,6 +640,14 @@ export default function Lektionsopbygger() {
   // Filter items for current module and mode
   const currentModule = MODULES_MAP[activeModule];
   const moduleItems = ALL_ITEMS.filter(i => i.moduleId === activeModule);
+
+  // Filter blocks to only show those with items from active module (or empty blocks)
+  const filteredBlocks = blocks.filter(b =>
+    b.items.length === 0 || b.items.some(uid => {
+      const item = findItem(uid);
+      return item && item.moduleId === activeModule;
+    })
+  );
   const theoryItems = moduleItems.filter(i => i.mode === "theory");
   const practiceItems = moduleItems.filter(i => i.mode === "practice");
 
@@ -1388,6 +1472,9 @@ export default function Lektionsopbygger() {
                                 {plan.blocks.length} blokke · {plan.savedAt ? new Date(plan.savedAt).toLocaleDateString("da-DK", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : ""}
                               </div>
                             </div>
+                            <button className="btn" onClick={(e) => renamePlan(name, e)} style={{
+                              padding: "3px 6px", fontSize: 10, background: "transparent", color: "#6B7280",
+                            }} title="Omdøb">✏️</button>
                             <button className="btn" onClick={(e) => deletePlan(name, e)} style={{
                               padding: "3px 6px", fontSize: 10, background: "transparent", color: "#6B7280",
                             }} title="Slet">✕</button>
@@ -1403,6 +1490,7 @@ export default function Lektionsopbygger() {
                           JSON.stringify(savedPlans[currentPlanName].blocks) !== JSON.stringify(blocks);
                         if (unsaved && !confirm("Du har ændringer der ikke er gemt. Vil du nulstille alligevel?")) return;
                         setBlocks([]); blockIdCounter.current = 1;
+                        setCurrentPlanName(null); setPlanNameInput("");
                         setShowPlanMenu(false);
                         showToast("Alle blokke nulstillet", "info");
                       }} style={{
@@ -1411,6 +1499,17 @@ export default function Lektionsopbygger() {
                       }}>↺ Planlæg nyt forløb forfra</button>
                     </div>
                   )}
+                  {/* Export / Import */}
+                  <div style={{ padding: "8px 14px", borderTop: "1px solid #1F2937", display: "flex", gap: 4 }}>
+                    <button className="btn" onClick={exportPlan} disabled={blocks.length === 0} style={{
+                      flex: 1, padding: "6px 10px", fontSize: 11,
+                      background: "#1A1F2E", color: blocks.length > 0 ? "#D1D5DB" : "#4B5563", border: "1px solid #333",
+                    }}>📤 Eksportér .drivelogger</button>
+                    <button className="btn" onClick={importPlan} style={{
+                      flex: 1, padding: "6px 10px", fontSize: 11,
+                      background: "#1A1F2E", color: "#D1D5DB", border: "1px solid #333",
+                    }}>📥 Importér</button>
+                  </div>
                 </div>
               )}
             </div>
@@ -1418,7 +1517,7 @@ export default function Lektionsopbygger() {
             <button className="btn" onClick={printPlan} style={{
               padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
               border: "1px solid #333",
-            }}>🖨 Eksportér</button>
+            }}>🖨 Eksportér PDF</button>
 
             <a href="#plangraf" className="btn" style={{
               padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#C4B5FD",
@@ -1754,11 +1853,11 @@ export default function Lektionsopbygger() {
                         }
                       }}
                     >
-                      {blocks.map((block, blockIdx) => {
-                        const globalIdx = blockIdx;
+                      {filteredBlocks.map((block, blockIdx) => {
+                        const globalIdx = blocks.indexOf(block);
                         const isBeingDragged = dragBlock === block.id;
                         const showGapBefore = dragBlock && blockInsertIndex === globalIdx && !isBeingDragged;
-                        const showGapAfter = dragBlock && blockInsertIndex === globalIdx + 1 && blockIdx === blocks.length - 1 && !isBeingDragged;
+                        const showGapAfter = dragBlock && blockInsertIndex === globalIdx + 1 && blockIdx === filteredBlocks.length - 1 && !isBeingDragged;
 
                         return (
                           <div key={block.id}
