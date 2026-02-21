@@ -165,7 +165,7 @@ function computeIntraModuleDeps(modId, modBlocks, blocks) {
     });
   }
 
-  // Rule 3: M3 regel — praksis fra 7.1-7.3, 7.6-7.8 skal gennemføres før øvrige M3-emner
+  // Rule 3: Modul 3 regel — praksis fra 7.1-7.3, 7.6-7.8 skal gennemføres før øvrige M3-emner
   // Kun teori/selvstudieblokke som targets (praksis-blokke får deps fra Rule 1 T→P matching)
   if (modId === 3) {
     const mod3 = MODULES_RAW.find(m => m.id === 3);

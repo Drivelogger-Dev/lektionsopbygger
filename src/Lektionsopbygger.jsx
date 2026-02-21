@@ -175,7 +175,7 @@ function validateBlocks(blocks) {
     }
   });
 
-  // 4. M3 regel: 7.1-7.3 + 7.6-7.8 praksis skal placeres før 7.4/7.10-7.15 praksis
+  // 4. Modul 3 regel: 7.1-7.3 + 7.6-7.8 praksis skal placeres før 7.4/7.10-7.15 praksis
   const mod3 = MODULES_MAP[3];
   if (mod3) {
     const gateIds = mod3.gateIds || [];
@@ -190,12 +190,12 @@ function validateBlocks(blocks) {
     const anyGateNotPlaced = gatePlaced.filter(i => i === -1);
 
     if (anyBlockedPlaced.length > 0 && anyGateNotPlaced.length > 0) {
-      errors.push("M3 regel: Alle emner (7.1–7.3, 7.6–7.8) SKAL være placeret i praksis FØR kryds/rundkørsler (7.4, 7.10–7.15).");
+      errors.push("Modul 3 regel: Alle emner (7.1–7.3, 7.6–7.8) SKAL være placeret i praksis FØR kryds/rundkørsler (7.4, 7.10–7.15).");
     } else if (anyBlockedPlaced.length > 0) {
       const maxGate = Math.max(...gatePlaced);
       const minBlocked = Math.min(...anyBlockedPlaced);
       if (maxGate > minBlocked) {
-        errors.push("M3 regel: Emner (7.1–7.3, 7.6–7.8) praksis skal placeres i blokke FØR kryds/rundkørsler praksis.");
+        errors.push("Modul 3 regel: Emner (7.1–7.3, 7.6–7.8) praksis skal placeres i blokke FØR kryds/rundkørsler praksis.");
       }
     }
   }
@@ -377,11 +377,11 @@ export default function Lektionsopbygger() {
   // Toast notifications
   const autoFontSize = () => {
     const w = window.innerWidth;
-    if (w >= 2560) return 23;
-    if (w >= 1920) return 21;
-    if (w >= 1440) return 20;
-    if (w >= 1280) return 19;
-    return 18;
+    if (w >= 2560) return 24;
+    if (w >= 1920) return 22;
+    if (w >= 1440) return 21;
+    if (w >= 1280) return 20;
+    return 19;
   };
   const [fontSize, setFontSize] = useState(() => {
     try {
@@ -1182,6 +1182,51 @@ export default function Lektionsopbygger() {
     showToast(`\uD83D\uDCC4 PDF downloadet: ${filename}`, "info");
   };
 
+  const [isMobile] = useState(() => window.innerWidth < 768);
+  const [copied, setCopied] = useState(false);
+
+  if (isMobile) {
+    return (
+      <div style={{
+        minHeight: "100vh", background: "#080B12", color: "#E5E7EB",
+        fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 32,
+      }}>
+        <div style={{
+          background: "#111827", borderRadius: 16, padding: "40px 28px",
+          textAlign: "center", maxWidth: 360, width: "100%",
+          border: "1px solid #1F2937", boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+        }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🖥️</div>
+          <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+            Kræver computer
+          </h2>
+          <p style={{ fontSize: 14, color: "#9CA3AF", lineHeight: 1.6, marginBottom: 24 }}>
+            Forløbsplanlæggeren kan kun bruges på en computer med mus og tastatur.
+          </p>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            style={{
+              background: copied ? "#14532D" : "#1F2937",
+              color: copied ? "#86EFAC" : "#E5E7EB",
+              border: "1px solid " + (copied ? "#14532D" : "#374151"),
+              borderRadius: 10, padding: "12px 24px", fontSize: 14,
+              fontWeight: 600, cursor: "pointer", width: "100%",
+              transition: "all 0.2s",
+            }}
+          >
+            {copied ? "✓ Link kopieret!" : "📋 Kopiér link"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -1220,7 +1265,7 @@ export default function Lektionsopbygger() {
           <div>
             <h1 style={{
               fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em",
-              color: "rgb(21,160,72)",
+              color: "rgb(71,150,100)",
               marginBottom: 2,
             }}>
               Forløbsplanlægger
@@ -1477,37 +1522,37 @@ export default function Lektionsopbygger() {
               const totalUnplaced = unplacedTheory.length + unplacedPractice.length;
               const allSelected = totalUnplaced > 0 && unplacedTheory.concat(unplacedPractice).every(i => selectedUids.has(i.uid));
               return (
-                <div style={{ display: "flex", gap: 3, padding: "8px 2px 2px", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: 5, padding: "8px 2px 4px", alignItems: "center", flexWrap: "wrap" }}>
                   <input type="checkbox"
                     checked={allSelected && totalUnplaced > 0}
                     onChange={() => allSelected ? clearSelection() : selectAllInModule("all")}
                     disabled={totalUnplaced === 0}
-                    style={{ width: 13, height: 13, cursor: "pointer", accentColor: currentModule.color }}
+                    style={{ width: 15, height: 15, cursor: "pointer", accentColor: currentModule.color }}
                   />
-                  <span style={{ fontSize: 10, color: "#6B7280", marginRight: 2 }}>Alle</span>
+                  <span style={{ fontSize: 12, color: "#6B7280", marginRight: 2 }}>Alle</span>
                   {unplacedTheory.length > 0 && unplacedSelfStudy.length > 0 && unplacedTheoryOnly.length > 0 && (
                     <button className="btn" onClick={() => selectAllInModule("theoryAll")} style={{
-                      padding: "2px 6px", fontSize: 9, background: "#1E3A5F22", color: "#93C5FD", border: "1px solid #1E3A5F33",
+                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#1E3A5F44", color: "#93C5FD", border: "1px solid #1E3A5F66", borderRadius: 6,
                     }}>📖+📚 {unplacedTheory.length}</button>
                   )}
                   {unplacedTheoryOnly.length > 0 && (
                     <button className="btn" onClick={() => selectAllInModule("theoryOnly")} style={{
-                      padding: "2px 6px", fontSize: 9, background: "#1E3A5F11", color: "#7DB4F0", border: "1px solid #1E3A5F22",
+                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#1E3A5F33", color: "#93C5FD", border: "1px solid #1E3A5F55", borderRadius: 6,
                     }}>📖 {unplacedTheoryOnly.length}</button>
                   )}
                   {unplacedSelfStudy.length > 0 && (
                     <button className="btn" onClick={() => selectAllInModule("selfStudy")} style={{
-                      padding: "2px 6px", fontSize: 9, background: "#3B076422", color: "#C4B5FD", border: "1px solid #3B076433",
+                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#3B076444", color: "#C4B5FD", border: "1px solid #3B076466", borderRadius: 6,
                     }}>📚 {unplacedSelfStudy.length}</button>
                   )}
                   {unplacedPractice.length > 0 && (
                     <button className="btn" onClick={() => selectAllInModule("practice")} style={{
-                      padding: "2px 6px", fontSize: 9, background: "#14532D22", color: "#86EFAC", border: "1px solid #14532D33",
+                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#14532D44", color: "#86EFAC", border: "1px solid #14532D66", borderRadius: 6,
                     }}>🚗 {unplacedPractice.length}</button>
                   )}
                   {selectedUids.size > 0 && (
                     <button className="btn" onClick={clearSelection} style={{
-                      padding: "2px 6px", fontSize: 9, background: "#33333366", color: "#9CA3AF", marginLeft: "auto",
+                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#33333388", color: "#9CA3AF", marginLeft: "auto", borderRadius: 6,
                     }}>✕ {selectedUids.size}</button>
                   )}
                 </div>
@@ -1829,7 +1874,7 @@ export default function Lektionsopbygger() {
                   </div>
                   <div>
                     <span style={{ color: "#FCA5A5" }}>⚡ Rækkefølge:</span> Teori FØR praksis altid<br />
-                    <span style={{ color: "#FCA5A5" }}>⚡ M3 regel:</span> 7.1–7.8 praksis FØR kryds<br />
+                    <span style={{ color: "#FCA5A5" }}>⚡ Modul 3 regel:</span> 7.1–7.8 praksis FØR kryds<br />
                     <span style={{ color: "#C4B5FD" }}>📚 Selvstudium:</span> Max 7 lektioner total<br />
                     <span style={{ color: "#9CA3AF" }}>📅 Min. 14 undervisningsdage</span>
                   </div>
