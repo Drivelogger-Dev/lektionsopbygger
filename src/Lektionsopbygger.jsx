@@ -1291,7 +1291,7 @@ export default function Lektionsopbygger() {
           </p>
           <button
             onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
+              navigator.clipboard.writeText("https://drivelogger.dk/planlaegger/");
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             }}
