@@ -171,7 +171,7 @@ function validateBlocks(blocks) {
       if (!item.mustBeFirst && firstNonMustFirstIdx === -1) firstNonMustFirstIdx = idx;
     });
     if (lastMustFirstIdx > 0 && firstNonMustFirstIdx !== -1 && firstNonMustFirstIdx < lastMustFirstIdx) {
-      errors.push(`"${block.name}" (blok ${bIdx + 1}): "Skal først"-mål (⚡) skal placeres øverst i blokken.`);
+      errors.push(`"${block.name}" (blok ${bIdx + 1}): "Skal afholdes først"-mål (⚡) skal placeres øverst i blokken.`);
     }
   });
 
@@ -643,7 +643,7 @@ export default function Lektionsopbygger() {
     });
 
     if (didAutoSort) {
-      showToast("⚡ Mål markeret \"Skal først\" er rykket til toppen — de skal gennemgås før øvrige emner iht. bekendtgørelsen.", "warn");
+      showToast("⚡ Mål markeret \"Skal afholdes først\" er rykket til toppen — de skal gennemgås før øvrige emner iht. bekendtgørelsen.", "warn");
     }
 
     setDragItem(null);
@@ -884,7 +884,7 @@ export default function Lektionsopbygger() {
     // --- HEADER ---
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text("Modulplan \u00B7 Kategori B", W / 2, y, { align: "center" });
+    doc.text("Undervisningsforl\u00F8b \u00B7 Kategori B", W / 2, y, { align: "center" });
     y += 7;
 
     if (currentPlanName) {
@@ -1004,12 +1004,6 @@ export default function Lektionsopbygger() {
         y += 4;
       });
       y += 4;
-    } else {
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(22, 163, 74);
-      doc.text("\u2705 Planen overholder alle krav", M, y);
-      y += 8;
     }
 
     // --- BLOCKS ---
@@ -1019,7 +1013,7 @@ export default function Lektionsopbygger() {
     doc.text("Blokke", M, y);
     y += 6;
 
-    const typeLabel = { theory: "Teori", practice: "K\u00F8retime", selfStudy: "Selvstudium" };
+    const typeLabel = { theory: "Teori", practice: "K\u00F8rsel", selfStudy: "Selvstudium" };
     const typeColor = { theory: [37, 99, 235], practice: [22, 163, 74], selfStudy: [124, 58, 237] };
     const typeBg = { theory: [239, 246, 255], practice: [240, 253, 244], selfStudy: [245, 243, 255] };
 
@@ -1066,8 +1060,8 @@ export default function Lektionsopbygger() {
       if (items.length > 0) {
         const itemRows = items.map(item => {
           let badges = "";
-          if (item.mustBeFirst) badges += "\u26A1 ";
-          if (item.selfStudy) badges += "\uD83D\uDCDA ";
+          if (item.mustBeFirst) badges += (item.mode === "practice" ? "Skal afholdes f\u00F8rst (efter teorilektionen) " : "Skal afholdes f\u00F8rst ");
+          if (item.selfStudy) badges += "(selvstudie) ";
           if (item.highlight) badges += item.highlight;
           return [
             `M${item.moduleId}`,
@@ -1120,13 +1114,13 @@ export default function Lektionsopbygger() {
         doc.setTextColor(170);
         doc.setFont("helvetica", "normal");
         const footY = doc.internal.pageSize.getHeight() - 10;
-        doc.text("Lavet med DriveLoggers Forl\u00F8bsplanl\u00E6gger", W / 2, footY, { align: "center" });
+        doc.text("Lavet med Driveloggers Forl\u00F8bsplanl\u00E6gger", W / 2, footY, { align: "center" });
         doc.text(
-          "Fraskrivelse: DriveLogger fraskriver sig ethvert ansvar for eventuelle fejl ift. overholdelse af lovkrav til udformning af undervisningsforl\u00F8b.",
+          "Drivelogger fraskriver sig ethvert ansvar for eventuelle fejl ift. overholdelse af lovkrav til udformning af undervisningsforl\u00F8b.",
           W / 2, footY + 3, { align: "center" }
         );
         doc.text(
-          `Det er k\u00F8rel\u00E6rerens ansvar at sikre, at den endelige undervisningsplan opfylder g\u00E6ldende bekendtg\u00F8relser.`,
+          `Det er k\u00F8rel\u00E6rerens ansvar at sikre, at den endelige undervisningsplan overholder g\u00E6ldende bekendtg\u00F8relser.`,
           W / 2, footY + 6, { align: "center" }
         );
         doc.setTextColor(200);
@@ -1920,8 +1914,8 @@ function SummaryView({ blocks, moduleCounts, validation }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 20 }}>
         {[
           { label: "Teoriblokke", value: blocks.filter(b => b.type === "theory").length, sub: `${blocks.filter(b => b.type === "theory").reduce((s, b) => s + b.lessons, 0)} lektioner`, icon: "📖", accent: "#3B82F6" },
-          { label: "Kørselsblokke", value: blocks.filter(b => b.type === "practice").length, sub: `${totalP} lektioner`, icon: "🚗", accent: "#22C55E" },
           { label: "Selvstudium", value: blocks.filter(b => b.type === "selfStudy").length, sub: `${totalSS}/${MAX_SELF_STUDY_LESSONS} lektioner`, icon: "📚", accent: "#A78BFA" },
+          { label: "Kørselsblokke", value: blocks.filter(b => b.type === "practice").length, sub: `${totalP} lektioner`, icon: "🚗", accent: "#22C55E" },
           { label: "I alt", value: totalAll, sub: `${blocks.length} blokke`, icon: "Σ", accent: "#9CA3AF" },
         ].map(s => (
           <div key={s.label} style={{
@@ -2188,7 +2182,7 @@ function PoolItem({ item, placed, onDragStart, onDragEnd, moduleColor, showGoals
             </span>
           </div>
           <div style={{ display: "flex", gap: 3, marginTop: 3, flexWrap: "wrap" }}>
-            {item.mustBeFirst && <span className="badge" style={{ background: "#7F1D1D", color: "#FCA5A5" }}>⚡ Skal først</span>}
+            {item.mustBeFirst && <span className="badge" style={{ background: "#7F1D1D", color: "#FCA5A5" }}>⚡ {item.mode === "practice" ? "Skal afholdes først (efter teorilektionen)" : "Skal afholdes først"}</span>}
             {item.selfStudy && <span className="badge" style={{ background: "#3B0764", color: "#C4B5FD" }}>📚 Selvstudium</span>}
             {item.context && <span className="badge" style={{ background: "#1F2937", color: "#9CA3AF" }}>{item.context}</span>}
             {item.highlight && <span className="badge" style={{ background: "#422006", color: "#FCD34D" }}>{item.highlight}</span>}

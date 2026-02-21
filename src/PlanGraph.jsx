@@ -576,7 +576,7 @@ function BlockNode({ data }) {
               </span>
               <span style={{ fontSize: 10, color: C.text }}>{item.sectionId} {item.title}</span>
               {item.mustBeFirst && (
-                <span title="Skal først" style={{ fontSize: 10, marginLeft: "auto" }}>⚡</span>
+                <span title={item.mode === "practice" ? "Skal afholdes først (efter teorilektionen)" : "Skal afholdes først"} style={{ fontSize: 10, marginLeft: "auto" }}>⚡</span>
               )}
             </div>
           ))}
@@ -912,7 +912,7 @@ function GraphViewInner({ blocks }) {
                 at den nederste blok skal gennemføres <b style={{ color: C.text }}>før</b> den øverste.
               </p>
               <p style={{ margin: "0 0 6px" }}>
-                <b style={{ color: C.text }}>⚡ = Skal først</b> — disse lektioner
+                <b style={{ color: C.text }}>⚡ = Skal afholdes først</b> — disse lektioner
                 skal afholdes før andre i samme modul.
               </p>
               <p style={{ margin: "0 0 2px" }}>
