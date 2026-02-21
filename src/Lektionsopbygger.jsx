@@ -1267,6 +1267,7 @@ export default function Lektionsopbygger() {
   };
 
   const [isMobile] = useState(() => window.innerWidth < 768);
+  const [isSmall] = useState(() => window.innerWidth < 1700);
 
   if (isMobile) {
     return (
@@ -1340,9 +1341,9 @@ export default function Lektionsopbygger() {
       `}</style>
 
       {/* Header */}
-      <div style={{ padding: "16px 24px 12px", borderBottom: "1px solid #1A1F2E" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-          <div style={{ minWidth: 200 }}>
+      <div style={{ padding: "24px 32px 16px", borderBottom: "1px solid #1A1F2E" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
             <h1 style={{
               fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em",
               color: "rgb(71,150,100)",
@@ -1350,11 +1351,11 @@ export default function Lektionsopbygger() {
             }}>
               Forløbsplanlægger
             </h1>
-            <p style={{ fontSize: 12, color: "#6B7280" }}>
+            <p style={{ fontSize: 12, color: "#6B7280", ...(isSmall && { maxWidth: 300 }) }}>
               Planlæg og strukturér dit undervisningsforløb efter BEK 1150 · Kategori B
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <div style={{ position: "relative" }}>
               <button className="btn" onClick={() => {
                 if (document.fullscreenElement) document.exitFullscreen();
@@ -1513,12 +1514,12 @@ export default function Lektionsopbygger() {
             <button className="btn" onClick={printPlan} style={{
               padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
               border: "1px solid #333",
-            }}>🖨 Eksportér PDF</button>
+            }}>{isSmall ? "🖨 PDF" : "🖨 Eksportér PDF"}</button>
 
             <a href="#plangraf" className="btn" style={{
               padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#C4B5FD",
               border: "1px solid #333", textDecoration: "none", display: "inline-flex", alignItems: "center",
-            }}>🧭 Forløbsoverblik</a>
+            }}>{isSmall ? "🧭 Overblik" : "🧭 Forløbsoverblik"}</a>
 
             <button className="btn" onClick={() => setShowValidation(v => !v)} style={{
               padding: "8px 16px", fontSize: 12,
