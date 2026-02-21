@@ -379,9 +379,9 @@ export default function Lektionsopbygger() {
     const w = window.innerWidth;
     if (w >= 2560) return 24;
     if (w >= 1920) return 22;
-    if (w >= 1440) return 21;
-    if (w >= 1280) return 20;
-    return 19;
+    if (w >= 1440) return 20;
+    if (w >= 1280) return 18;
+    return 16;
   };
   const [fontSize, setFontSize] = useState(() => {
     try {
@@ -1562,7 +1562,7 @@ export default function Lektionsopbygger() {
 
         {/* LEFT: Goal pool */}
         <div style={{
-          width: 420, flexShrink: 0, borderRight: "1px solid #1A1F2E",
+          width: window.innerWidth < 1380 ? 340 : 420, flexShrink: 0, borderRight: "1px solid #1A1F2E",
           display: "flex", flexDirection: "column", overflow: "hidden",
         }}
           onDragOver={e => e.preventDefault()}
@@ -1596,7 +1596,7 @@ export default function Lektionsopbygger() {
           <div style={{ padding: "12px 16px 8px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
               <div style={{
-                width: 28, height: 28, borderRadius: "50%", background: currentModule.color,
+                minWidth: 28, width: 28, height: 28, borderRadius: "50%", background: currentModule.color,
                 color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
                 fontWeight: 800, fontSize: 14, fontFamily: "'DM Mono', monospace",
               }}>{activeModule}</div>
@@ -2115,7 +2115,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                 <div style={{
-                  width: 22, height: 22, borderRadius: "50%", background: mod.color,
+                  minWidth: 22, width: 22, height: 22, borderRadius: "50%", background: mod.color,
                   color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 11, fontWeight: 800, fontFamily: "'DM Mono', monospace",
                 }}>{mod.id}</div>
@@ -2205,7 +2205,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
                   borderBottom: `2px solid ${mod.color}33`, marginBottom: 6,
                 }}>
                   <div style={{
-                    width: 24, height: 24, borderRadius: "50%", background: mod.color,
+                    minWidth: 24, width: 24, height: 24, borderRadius: "50%", background: mod.color,
                     color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 12, fontWeight: 800, fontFamily: "'DM Mono', monospace",
                   }}>{modId}</div>
@@ -2581,7 +2581,7 @@ function BlockCard({
                 }}
               >
                 <div style={{
-                  width: 20, height: 20, borderRadius: "50%", background: mod.color + "33",
+                  minWidth: 20, width: 20, height: 20, borderRadius: "50%", background: mod.color + "33",
                   color: mod.color, display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 9, fontWeight: 800, flexShrink: 0, fontFamily: "'DM Mono', monospace",
                 }}>
