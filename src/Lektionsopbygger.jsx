@@ -1141,6 +1141,7 @@ export default function Lektionsopbygger() {
       background: "#080B12",
       color: "#E5E7EB",
       fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif",
+      fontSize: 15,
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=DM+Mono:wght@400;500&display=swap');
@@ -1155,20 +1156,20 @@ export default function Lektionsopbygger() {
         .drag-over { outline: 2px dashed #3B82F6 !important; outline-offset: -2px; background: #111827 !important; }
         .block-drop { transition: outline 0.15s, background 0.15s; }
         .placed { opacity: 0.3; pointer-events: none; }
-        .pool-item { border-radius: 8px; padding: 8px 12px; margin-bottom: 4px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+        .pool-item { border-radius: 8px; padding: 9px 13px; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
         .btn { border: none; cursor: pointer; font-family: inherit; border-radius: 6px; font-weight: 600; transition: all 0.12s; }
         .btn:hover { filter: brightness(1.15); }
-        .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; letter-spacing: 0.03em; white-space: nowrap; }
+        .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; letter-spacing: 0.03em; white-space: nowrap; }
         .block-card { border-radius: 12px; overflow: hidden; transition: all 0.2s; }
         .remove-btn { opacity: 0; transition: opacity 0.15s; }
         .pool-item:hover .remove-btn { opacity: 1; }
-        .module-tab { padding: 10px 16px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.15s; font-family: inherit; }
+        .module-tab { padding: 11px 18px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.15s; font-family: inherit; }
         .module-tab:hover { filter: brightness(1.1); }
       `}</style>
 
       {/* Header */}
       <div style={{ padding: "24px 32px 16px", borderBottom: "1px solid #1A1F2E" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 1400, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h1 style={{
               fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em",
@@ -1303,7 +1304,7 @@ export default function Lektionsopbygger() {
 
       {/* Validation panel */}
       {showValidation && (validation.errors.length > 0 || validation.warnings.length > 0) && (
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "12px 32px" }}>
+        <div style={{ padding: "12px 32px" }}>
           <div style={{
             background: validation.errors.length > 0 ? "#1C0A0A" : "#0A1C0D",
             border: `1px solid ${validation.errors.length > 0 ? "#7F1D1D" : "#14532D"}`,
@@ -1324,7 +1325,7 @@ export default function Lektionsopbygger() {
       )}
 
       {/* Main layout */}
-      <div style={{ display: "flex", maxWidth: 1400, margin: "0 auto", gap: 0, minHeight: "calc(100vh - 100px)" }}>
+      <div style={{ display: "flex", gap: 0, minHeight: "calc(100vh - 100px)" }}>
 
         {/* LEFT: Goal pool */}
         <div style={{
