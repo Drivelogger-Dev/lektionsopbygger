@@ -1220,8 +1220,7 @@ export default function Lektionsopbygger() {
           <div>
             <h1 style={{
               fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em",
-              background: "linear-gradient(135deg, #60A5FA, #A78BFA, #F472B6)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              color: "#22C55E",
               marginBottom: 2,
             }}>
               Forløbsplanlægger
