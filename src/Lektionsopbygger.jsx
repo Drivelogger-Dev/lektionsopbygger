@@ -370,14 +370,60 @@ export default function Lektionsopbygger() {
   const [showGoals, setShowGoals] = useState({});
   const [showValidation, setShowValidation] = useState(false);
   const blockIdCounter = useRef(1);
-  // Filter state for right panel
-  const [filterModule, setFilterModule] = useState("all"); // "all" | 1 | 2 | 3 | 4 | 5
-  const [filterType, setFilterType] = useState("all"); // "all" | "theory" | "practice" | "selfStudy"
   // View mode: "build" or "summary"
   const [viewMode, setViewMode] = useState("build");
   // Multi-select for bulk move
   const [selectedUids, setSelectedUids] = useState(new Set());
   // Toast notifications
+  const autoFontSize = () => {
+    const w = window.innerWidth;
+    if (w >= 2560) return 23;
+    if (w >= 1920) return 21;
+    if (w >= 1440) return 20;
+    if (w >= 1280) return 19;
+    return 18;
+  };
+  const [fontSize, setFontSize] = useState(() => {
+    try {
+      const saved = localStorage.getItem("lektionsopbygger_fontSize");
+      return saved ? parseInt(saved) : autoFontSize();
+    } catch { return autoFontSize(); }
+  });
+  const [fontSizeOverridden, setFontSizeOverridden] = useState(() => !!localStorage.getItem("lektionsopbygger_fontSize"));
+  const changeFontSize = (delta) => {
+    setFontSize(prev => {
+      const next = Math.max(10, Math.min(28, prev + delta));
+      localStorage.setItem("lektionsopbygger_fontSize", next);
+      setFontSizeOverridden(true);
+      return next;
+    });
+  };
+  const resetFontSize = () => {
+    localStorage.removeItem("lektionsopbygger_fontSize");
+    setFontSize(autoFontSize());
+    setFontSizeOverridden(false);
+  };
+
+  // Fullscreen suggestion — show once after first interaction
+  const [showFsHint, setShowFsHint] = useState(false);
+  const fsHintShown = useRef(false);
+  useEffect(() => {
+    if (sessionStorage.getItem("fsHintDismissed")) return;
+    const onInteract = () => {
+      if (fsHintShown.current || document.fullscreenElement) return;
+      fsHintShown.current = true;
+      setTimeout(() => {
+        if (!document.fullscreenElement) setShowFsHint(true);
+      }, 3000);
+      window.removeEventListener("click", onInteract);
+      window.removeEventListener("dragstart", onInteract);
+    };
+    window.addEventListener("click", onInteract);
+    window.addEventListener("dragstart", onInteract);
+    return () => { window.removeEventListener("click", onInteract); window.removeEventListener("dragstart", onInteract); };
+  }, []);
+  const dismissFsHint = () => { setShowFsHint(false); sessionStorage.setItem("fsHintDismissed", "1"); };
+
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
   const showToast = (msg, type = "info") => {
@@ -407,10 +453,11 @@ export default function Lektionsopbygger() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const savePlan = (name) => {
+  const savePlan = (name, overrideBlocks) => {
     if (!name.trim()) return;
+    const saveBlocks = overrideBlocks !== undefined ? overrideBlocks : blocks;
     const plan = {
-      blocks,
+      blocks: saveBlocks,
       blockIdCounter: blockIdCounter.current,
       savedAt: new Date().toISOString(),
     };
@@ -1141,7 +1188,7 @@ export default function Lektionsopbygger() {
       background: "#080B12",
       color: "#E5E7EB",
       fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif",
-      fontSize: 15,
+      zoom: fontSize / 15,
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=DM+Mono:wght@400;500&display=swap');
@@ -1184,13 +1231,57 @@ export default function Lektionsopbygger() {
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div style={{ position: "relative" }}>
+              <button className="btn" onClick={() => {
+                if (document.fullscreenElement) document.exitFullscreen();
+                else { document.documentElement.requestFullscreen(); dismissFsHint(); }
+              }} style={{
+                padding: "8px 14px", fontSize: 12, background: showFsHint ? "#1E3A5F" : "#1A1F2E", color: showFsHint ? "#93C5FD" : "#D1D5DB",
+                border: `1px solid ${showFsHint ? "#3B82F6" : "#333"}`,
+                transition: "all 0.3s",
+              }}>⛶ Fuld skærm</button>
+              {showFsHint && (
+                <div style={{
+                  position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)",
+                  marginTop: 8, background: "#1E3A5F", border: "1px solid #3B82F6",
+                  borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#D1D5DB",
+                  whiteSpace: "nowrap", zIndex: 999, boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+                  display: "flex", alignItems: "center", gap: 8,
+                }}>
+                  <span>Tip: Prøv fuld skærm for bedre overblik</span>
+                  <button className="btn" onClick={dismissFsHint} style={{
+                    padding: "2px 6px", fontSize: 10, background: "transparent", color: "#6B7280",
+                  }}>✕</button>
+                  <div style={{
+                    position: "absolute", top: -5, left: "50%", transform: "translateX(-50%) rotate(45deg)",
+                    width: 10, height: 10, background: "#1E3A5F", borderTop: "1px solid #3B82F6", borderLeft: "1px solid #3B82F6",
+                  }} />
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 2, background: "#1A1F2E", border: "1px solid #333", borderRadius: 6, padding: "2px" }}>
+              <button className="btn" onClick={() => changeFontSize(-1)} style={{
+                padding: "5px 10px", fontSize: 13, background: "transparent", color: "#D1D5DB",
+              }}>−</button>
+              <button className="btn" onClick={resetFontSize} title="Nulstil til automatisk" style={{
+                padding: "3px 6px", fontSize: 11, background: "transparent",
+                color: fontSizeOverridden ? "#93C5FD" : "#6B7280", minWidth: 28, textAlign: "center",
+              }}>🔍 {fontSize}</button>
+              <button className="btn" onClick={() => changeFontSize(1)} style={{
+                padding: "5px 10px", fontSize: 13, background: "transparent", color: "#D1D5DB",
+              }}>+</button>
+            </div>
+
+            <span style={{ width: 1, height: 24, background: "#333", flexShrink: 0, marginLeft: 16, marginRight: 16 }} />
+
             {/* Plan manager */}
             <div style={{ position: "relative" }} ref={planMenuRef}>
               <button className="btn" onClick={() => setShowPlanMenu(v => !v)} style={{
                 padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
                 border: "1px solid #333", display: "flex", alignItems: "center", gap: 6,
               }}>
-                💾 {currentPlanName || "Gem / Indlæs"} ▾
+                💾 {currentPlanName || "Forløb"} ▾
               </button>
 
               {showPlanMenu && (
@@ -1200,42 +1291,33 @@ export default function Lektionsopbygger() {
                   width: 280, boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
                   overflow: "hidden",
                 }}>
-                  {/* Save new */}
+                  {/* Smart save */}
                   <div style={{ padding: "12px 14px", borderBottom: "1px solid #1F2937" }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 6 }}>Gem plan</div>
                     <div style={{ display: "flex", gap: 4 }}>
                       <input
                         value={planNameInput}
                         onChange={(e) => setPlanNameInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && savePlan(planNameInput)}
-                        placeholder={currentPlanName || "Navngiv plan..."}
+                        onKeyDown={(e) => e.key === "Enter" && savePlan(planNameInput.trim() || currentPlanName || "Unavngivet")}
+                        placeholder={currentPlanName || "Navngiv forløb..."}
                         style={{
                           flex: 1, background: "#0D0F16", border: "1px solid #333", borderRadius: 6,
                           padding: "6px 10px", fontSize: 12, color: "#E5E7EB", outline: "none",
                           fontFamily: "inherit",
                         }}
                       />
-                      <button className="btn" onClick={() => savePlan(planNameInput || currentPlanName || "Unavngivet")} style={{
-                        padding: "6px 12px", fontSize: 11, background: "#1E3A5F", color: "#93C5FD",
-                      }}>Gem</button>
+                      <button className="btn" onClick={() => savePlan(planNameInput.trim() || currentPlanName || "Unavngivet")} style={{
+                        padding: "6px 12px", fontSize: 11,
+                        background: planNameInput.trim() && planNameInput.trim() !== currentPlanName ? "#14532D" : "#1E3A5F",
+                        color: planNameInput.trim() && planNameInput.trim() !== currentPlanName ? "#86EFAC" : "#93C5FD",
+                      }}>{planNameInput.trim() && planNameInput.trim() !== currentPlanName ? "Gem som nyt" : currentPlanName ? "Opdatér" : "Gem"}</button>
                     </div>
-                    {currentPlanName && (
-                      <div style={{ display: "flex", gap: 4, marginTop: 6 }}>
-                        <button className="btn" onClick={() => savePlan(currentPlanName)} style={{
-                          padding: "4px 10px", fontSize: 10, background: "#14532D33", color: "#86EFAC", flex: 1,
-                        }}>💾 Overskriv "{currentPlanName}"</button>
-                        <button className="btn" onClick={duplicatePlan} style={{
-                          padding: "4px 10px", fontSize: 10, background: "#1A1F2E", color: "#9CA3AF", border: "1px solid #333",
-                        }}>📋 Kopiér</button>
-                      </div>
-                    )}
                   </div>
 
                   {/* Saved plans list */}
                   <div style={{ maxHeight: 240, overflow: "auto" }}>
                     {Object.keys(savedPlans).length === 0 ? (
                       <div style={{ padding: "16px 14px", color: "#4B5563", fontSize: 12, textAlign: "center" }}>
-                        Ingen gemte planer endnu
+                        Ingen gemte forløb endnu
                       </div>
                     ) : (
                       Object.entries(savedPlans)
@@ -1269,17 +1351,25 @@ export default function Lektionsopbygger() {
                         ))
                     )}
                   </div>
+                  {/* Reset */}
+                  {blocks.length > 0 && (
+                    <div style={{ padding: "8px 14px", borderTop: "1px solid #1F2937" }}>
+                      <button className="btn" onClick={() => {
+                        const unsaved = !currentPlanName || !savedPlans[currentPlanName] ||
+                          JSON.stringify(savedPlans[currentPlanName].blocks) !== JSON.stringify(blocks);
+                        if (unsaved && !confirm("Du har ændringer der ikke er gemt. Vil du nulstille alligevel?")) return;
+                        setBlocks([]); blockIdCounter.current = 1;
+                        setShowPlanMenu(false);
+                        showToast("Alle blokke nulstillet", "info");
+                      }} style={{
+                        width: "100%", padding: "6px 10px", fontSize: 11,
+                        background: "#1A1F2E", color: "#9CA3AF", border: "1px solid #333",
+                      }}>↺ Planlæg nyt forløb forfra</button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-
-            <button className="btn" onClick={() => {
-              if (document.fullscreenElement) document.exitFullscreen();
-              else document.documentElement.requestFullscreen();
-            }} style={{
-              padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
-              border: "1px solid #333",
-            }}>⛶ Fuld skærm</button>
 
             <button className="btn" onClick={printPlan} style={{
               padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
@@ -1289,7 +1379,7 @@ export default function Lektionsopbygger() {
             <a href="#plangraf" className="btn" style={{
               padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#C4B5FD",
               border: "1px solid #333", textDecoration: "none", display: "inline-flex", alignItems: "center",
-            }}>📊 Forløbsoverblik</a>
+            }}>🧭 Forløbsoverblik</a>
 
             <button className="btn" onClick={() => setShowValidation(v => !v)} style={{
               padding: "8px 16px", fontSize: 12,
@@ -1329,7 +1419,7 @@ export default function Lektionsopbygger() {
 
         {/* LEFT: Goal pool */}
         <div style={{
-          width: 380, flexShrink: 0, borderRight: "1px solid #1A1F2E",
+          width: 420, flexShrink: 0, borderRight: "1px solid #1A1F2E",
           display: "flex", flexDirection: "column", overflow: "hidden",
         }}
           onDragOver={e => e.preventDefault()}
@@ -1343,12 +1433,12 @@ export default function Lektionsopbygger() {
               const modPlaced = modItemsAll.filter(i => placedUids.has(i.uid)).length;
               const pct = modItemsAll.length > 0 ? Math.round(modPlaced / modItemsAll.length * 100) : 0;
               return (
-                <button key={mod.id} className="module-tab" onClick={() => { setActiveModule(mod.id); setFilterModule(mod.id); setSelectedUids(new Set()); }} style={{
+                <button key={mod.id} className="module-tab" onClick={() => { setActiveModule(mod.id); setSelectedUids(new Set()); }} style={{
                   background: isActive ? mod.color + "22" : "#111318",
                   borderColor: isActive ? mod.color : "#1A1F2E",
                   color: isActive ? mod.color : "#6B7280",
                 }}>
-                  <span style={{ fontFamily: "'DM Mono', monospace", marginRight: 4 }}>M{mod.id}</span>
+                  <span style={{ marginRight: 4 }}>Modul {mod.id}</span>
                   <span style={{
                     fontSize: 10, padding: "1px 5px", borderRadius: 99, marginLeft: 2,
                     background: pct === 100 ? "#14532D" : mod.color + "22",
@@ -1369,17 +1459,11 @@ export default function Lektionsopbygger() {
               }}>{activeModule}</div>
               <span style={{ fontSize: 14, fontWeight: 700, color: "#F3F4F6" }}>{currentModule.title}</span>
             </div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <span className="badge" style={{ background: "#1E3A5F", color: "#93C5FD" }}>📖 {currentModule.theory}T krævet</span>
-              <span className="badge" style={{ background: "#1A3D22", color: "#86EFAC" }}>🚗 {currentModule.practice}P krævet</span>
-              {currentModule.practiceNote && <span className="badge" style={{ background: "#422006", color: "#FCD34D" }}>⚠ {currentModule.practiceNote}</span>}
-              <span className="badge" style={{
-                background: moduleCounts[activeModule] ? "#111" : "#111",
-                color: "#9CA3AF", border: "1px solid #333",
-              }}>
-                Tildelt: {Math.round(moduleCounts[activeModule]?.theory || 0)}T + {Math.round(moduleCounts[activeModule]?.practice || 0)}P
-              </span>
-            </div>
+            {currentModule.practiceNote && (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <span className="badge" style={{ background: "#422006", color: "#FCD34D" }}>⚠ {currentModule.practiceNote}</span>
+              </div>
+            )}
           </div>
 
           {/* Items pool - scrollable */}
@@ -1518,7 +1602,7 @@ export default function Lektionsopbygger() {
               color: viewMode === "summary" ? "#F3F4F6" : "#6B7280",
               boxShadow: viewMode === "summary" ? "0 1px 4px #0003" : "none",
             }}>
-              📊 Forløbsoversigt
+              📋 Se forløb
             </button>
           </div>
 
@@ -1559,100 +1643,39 @@ export default function Lektionsopbygger() {
                 </div>
               </div>
 
-              {/* Filter bar — single row */}
-              <div style={{
-                display: "flex", gap: 4, marginBottom: 12, alignItems: "center",
-                overflowX: "auto", paddingBottom: 2,
-              }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#4B5563", textTransform: "uppercase", letterSpacing: "0.08em", marginRight: 2, flexShrink: 0 }}>
-                  Vis:
-                </span>
-                {/* Module filter */}
-                {[{ v: "all", label: "Alle moduler" }, ...MODULES_RAW.map(m => ({ v: m.id, label: `M${m.id}`, color: m.color }))].map(f => (
-                  <button key={f.v} className="btn" onClick={() => setFilterModule(f.v)} style={{
-                    padding: "4px 9px", fontSize: 11, borderRadius: 6, flexShrink: 0,
-                    background: filterModule === f.v ? (f.color || "#1A1F2E") + (f.color ? "33" : "") : "#111318",
-                    color: filterModule === f.v ? (f.color || "#F3F4F6") : "#6B7280",
-                    border: `1px solid ${filterModule === f.v ? (f.color || "#333") + "66" : "#1A1F2E"}`,
-                  }}>{f.label}</button>
-                ))}
-                <span style={{ width: 1, height: 18, background: "#1A1F2E", margin: "0 4px", flexShrink: 0 }} />
-                {/* Type filter — same line */}
-                {[
-                  { v: "all", label: "Alle typer" },
-                  { v: "theory", label: "📖 Teori", color: "#3B82F6" },
-                  { v: "practice", label: "🚗 Praksis", color: "#22C55E" },
-                  { v: "selfStudy", label: "📚 Selvstudium", color: "#A78BFA" },
-                ].map(f => (
-                  <button key={f.v} className="btn" onClick={() => setFilterType(f.v)} style={{
-                    padding: "4px 9px", fontSize: 11, borderRadius: 6, flexShrink: 0,
-                    background: filterType === f.v ? (f.color ? f.color + "22" : "#1A1F2E") : "#111318",
-                    color: filterType === f.v ? (f.color || "#F3F4F6") : "#6B7280",
-                    border: `1px solid ${filterType === f.v ? (f.color ? f.color + "66" : "#333") : "#1A1F2E"}`,
-                  }}>{f.label}</button>
-                ))}
-              </div>
-
-              {/* Module lesson overview */}
+              {/* Module lesson overview — only active module */}
+              {(() => {
+                const mod = MODULES_RAW.find(m => m.id === activeModule);
+                if (!mod) return null;
+                const tc = Math.round(moduleCounts[mod.id]?.theory || 0);
+                const pc = Math.round(moduleCounts[mod.id]?.practice || 0);
+                const ss = Math.round(moduleCounts[mod.id]?.selfStudy || 0);
+                const tOk = tc >= mod.theory;
+                const pOk = pc >= mod.practice;
+                return (
               <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-                {MODULES_RAW.filter(mod => filterModule === "all" || mod.id === filterModule).map(mod => {
-                  const tc = Math.round(moduleCounts[mod.id]?.theory || 0);
-                  const pc = Math.round(moduleCounts[mod.id]?.practice || 0);
-                  const ss = Math.round(moduleCounts[mod.id]?.selfStudy || 0);
-                  const tOk = tc >= mod.theory;
-                  const pOk = pc >= mod.practice;
-                  return (
-                    <div key={mod.id} style={{
+                    <div style={{
                       background: "#111318", border: `1px solid ${mod.color}33`,
                       borderRadius: 8, padding: "6px 10px", fontSize: 11, minWidth: 130,
                     }}>
                       <div style={{ fontWeight: 700, color: mod.color, marginBottom: 2, fontFamily: "'DM Mono', monospace" }}>
-                        M{mod.id}
+                        Modul {mod.id}
                       </div>
                       <div style={{ color: tOk ? "#86EFAC" : "#FCA5A5" }}>
-                        📖 {tc}/{mod.theory}T {tOk ? "✓" : ""} {ss > 0 ? `(${ss} selvst.)` : ""}
+                        {tc}/{mod.theory} Teori {tOk ? "✓" : ""} {ss > 0 ? `(${ss} selvst.)` : ""}
                       </div>
                       <div style={{ color: pOk ? "#86EFAC" : mod.practice === 0 ? "#6B7280" : "#FCA5A5" }}>
-                        🚗 {pc}/{mod.practice}P {pOk ? "✓" : ""}
+                        {pc}/{mod.practice} Praksis {pOk ? "✓" : ""}
                       </div>
                     </div>
-                  );
-                })}
               </div>
+                );
+              })()}
 
-              {/* Filtered Blocks */}
+              {/* Blocks */}
               {(() => {
-                const filtered = blocks.filter(block => {
-                  // Type filter
-                  if (filterType !== "all" && block.type !== filterType) return false;
-                  // Module filter
-                  if (filterModule !== "all") {
-                    const hasModuleItem = block.items.some(uid => {
-                      const item = findItem(uid);
-                      return item && item.moduleId === filterModule;
-                    });
-                    // Show block if it has items from this module OR is empty (so you can drag into it)
-                    if (!hasModuleItem && block.items.length > 0) return false;
-                  }
-                  return true;
-                });
-                const hiddenCount = blocks.length - filtered.length;
-
                 return (
                   <>
-                    {hiddenCount > 0 && (
-                      <div style={{
-                        padding: "8px 12px", marginBottom: 8, borderRadius: 8,
-                        background: "#111318", border: "1px solid #1A1F2E",
-                        fontSize: 11, color: "#6B7280", display: "flex", alignItems: "center", gap: 6,
-                      }}>
-                        <span>🔍</span>
-                        <span>Viser {filtered.length} af {blocks.length} blokke — {hiddenCount} skjult af filter</span>
-                        <button className="btn" onClick={() => { setFilterModule("all"); setFilterType("all"); }} style={{
-                          padding: "3px 8px", fontSize: 10, background: "#1A1F2E", color: "#9CA3AF", marginLeft: "auto",
-                        }}>Nulstil filter</button>
-                      </div>
-                    )}
                     {blocks.length === 0 && (
                       <div
                         onDragOver={(e) => { e.preventDefault(); setDragOverNewBlock(true); }}
@@ -1687,11 +1710,11 @@ export default function Lektionsopbygger() {
                         }
                       }}
                     >
-                      {filtered.map((block, filteredIdx) => {
-                        const globalIdx = blocks.findIndex(b => b.id === block.id);
+                      {blocks.map((block, blockIdx) => {
+                        const globalIdx = blockIdx;
                         const isBeingDragged = dragBlock === block.id;
                         const showGapBefore = dragBlock && blockInsertIndex === globalIdx && !isBeingDragged;
-                        const showGapAfter = dragBlock && blockInsertIndex === globalIdx + 1 && filteredIdx === filtered.length - 1 && !isBeingDragged;
+                        const showGapAfter = dragBlock && blockInsertIndex === globalIdx + 1 && blockIdx === blocks.length - 1 && !isBeingDragged;
 
                         return (
                           <div key={block.id}
