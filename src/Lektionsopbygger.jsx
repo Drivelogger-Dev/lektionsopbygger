@@ -2118,15 +2118,15 @@ export default function Lektionsopbygger() {
                   <div>
                     <span style={{ color: t.badgeTheoryText }}>📖 Teori:</span> Max 4 lektioner/dag<br />
                     <span style={{ color: t.badgePracticeText }}>🚗 Kørsel:</span> Max 3 lektioner/dag (undtagen KTA)<br />
-                    <span style={{ color: t.badgeWarningText }}>⭐ Motorvej:</span> M\u00e5 k\u00f8re \u00e9n ekstra lektion (motorvejsk\u00f8rsel) efter KTA hvis undtaget for motorvejsk\u00f8rsel efter undervisningsplanen<br />
                     <span style={{ color: "#F472B6" }}>🏎️ KTA:</span> Max 4 lektioner/dag<br />
-                    <span style={{ color: t.badgeNeutralText }}>📊 Samlet:</span> Max 8 lektioner p\u00e5 en dag
+                    <span style={{ color: t.badgeWarningText }}>⭐ Motorvej:</span> {"Må køre én ekstra lektion (motorvejskørsel) efter KTA hvis undtaget for motorvejskørsel efter undervisningsplanen"}
                   </div>
                   <div>
                     <span style={{ color: t.errorText }}>⚡ Rækkefølge:</span> Teori FØR praksis altid<br />
-                    <span style={{ color: t.errorText }}>⚡ M3 gate:</span> 7.1-7.3 og 7.6-7.8 praksis f\u00f8r 7.4 og 7.10-7.15 praksis<br />
+                    <span style={{ color: t.errorText }}>⚡ M3 gate:</span> {"7.1-7.3 og 7.6-7.8 praksis før 7.4 og 7.10-7.15 praksis"}<br />
                     <span style={{ color: t.badgeSelfStudyText }}>📚 Selvstudium:</span> Max 7 lektioner total<br />
-                    <span style={{ color: t.badgeNeutralText }}>📅 Min. 14 undervisningsdage</span>
+                    <span style={{ color: t.badgeNeutralText }}>📅 Min. 14 undervisningsdage</span><br />
+                    <span style={{ color: t.badgeNeutralText }}>📊 Samlet:</span> {"Max 8 lektioner på en dag"}
                   </div>
                 </div>
               </div>
