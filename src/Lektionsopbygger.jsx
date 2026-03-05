@@ -346,10 +346,88 @@ function autoAdjustBlockLessons(blocks, blockId) {
 // COMPONENT
 // ─────────────────────────────────────────────────────────
 
-const BLOCK_COLORS = {
-  theory: { bg: "#0C1929", accent: "#3B82F6", text: "#E0ECFF", headerBg: "#152238", badge: "#1E3A5F" },
-  practice: { bg: "#0D1F12", accent: "#22C55E", text: "#D4FDDF", headerBg: "#142A18", badge: "#1A3D22" },
-  selfStudy: { bg: "#150D22", accent: "#A78BFA", text: "#E8DCFF", headerBg: "#1C1233", badge: "#2E1A50" },
+// ─────────────────────────────────────────────────────────
+// THEME SYSTEM
+// ─────────────────────────────────────────────────────────
+
+const THEMES = {
+  dark: {
+    bgMain: "#080B12", bgSurface: "#111318", bgElevated: "#1A1F2E", bgDeep: "#0D0F16",
+    bgDropdown: "#141820", bgDragOver: "#111827",
+    textPrimary: "#E5E7EB", textSecondary: "#D1D5DB", textBright: "#F3F4F6",
+    textMuted: "#6B7280", textDim: "#4B5563",
+    border: "#333", borderSubtle: "#1A1F2E",
+    scrollThumb: "#333", inputBg: "#0D0F16",
+    headerGradient: "linear-gradient(135deg, #60A5FA, #A78BFA, #F472B6)",
+    badgeTheoryBg: "#1E3A5F", badgeTheoryText: "#93C5FD",
+    badgePracticeBg: "#14532D", badgePracticeText: "#86EFAC",
+    badgeSelfStudyBg: "#3B0764", badgeSelfStudyText: "#C4B5FD",
+    badgeNeutralBg: "#1F2937", badgeNeutralText: "#9CA3AF",
+    badgeWarningBg: "#422006", badgeWarningText: "#FCD34D",
+    errorBg: "#1C0A0A", errorBorder: "#7F1D1D", errorText: "#FCA5A5",
+    successBg: "#0A1C0D", successBorder: "#14532D", successText: "#86EFAC",
+    warningText: "#FDE68A",
+    btnTheoryGrad: "linear-gradient(135deg, #1E3A5F, #1E40AF)", btnTheoryText: "#93C5FD",
+    btnPracticeGrad: "linear-gradient(135deg, #14532D, #166534)", btnPracticeText: "#86EFAC",
+    btnSelfStudyGrad: "linear-gradient(135deg, #2E1A50, #5B21B6)", btnSelfStudyText: "#C4B5FD",
+    toastBg: "#1A1F2E", toastBorder: "#333", toastWarnBg: "#422006", toastWarnBorder: "#92400E",
+    poolTheoryBg: "#0F172A", poolTheoryBorder: "#1E3A5F",
+    poolPracticeBg: "#0B1A0F", poolPracticeBorder: "#14532D",
+    poolGoalsTheory: "#0C1222", poolGoalsPractice: "#081310",
+    milestoneBg1: "#1C0F05", milestoneBorder1: "#92400E44",
+    milestoneBg2: "#0A1C0D", milestoneBorder2: "#14532D",
+    deleteBg: "#7F1D1D44", deleteText: "#FCA5A5",
+    shadow: "0 8px 32px rgba(0,0,0,0.5)", shadowLight: "0 12px 40px rgba(0,0,0,0.6)",
+    selectTheoryBg: "#1E3A5F22", selectTheoryBorder: "#1E3A5F33",
+    selectTheoryAllBg: "#1E3A5F11", selectTheoryAllBorder: "#1E3A5F22", selectTheoryAllText: "#7DB4F0",
+    selectSelfStudyBg: "#3B076422", selectSelfStudyBorder: "#3B076433",
+    selectPracticeBg: "#14532D22", selectPracticeBorder: "#14532D33",
+  },
+  light: {
+    bgMain: "#F8FAFC", bgSurface: "#F3F4F6", bgElevated: "#FFFFFF", bgDeep: "#FFFFFF",
+    bgDropdown: "#FFFFFF", bgDragOver: "#DBEAFE",
+    textPrimary: "#1F2937", textSecondary: "#374151", textBright: "#111827",
+    textMuted: "#6B7280", textDim: "#9CA3AF",
+    border: "#D1D5DB", borderSubtle: "#E5E7EB",
+    scrollThumb: "#CBD5E1", inputBg: "#FFFFFF",
+    headerGradient: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",
+    badgeTheoryBg: "#DBEAFE", badgeTheoryText: "#1E40AF",
+    badgePracticeBg: "#D1FAE5", badgePracticeText: "#166534",
+    badgeSelfStudyBg: "#EDE9FE", badgeSelfStudyText: "#5B21B6",
+    badgeNeutralBg: "#F3F4F6", badgeNeutralText: "#6B7280",
+    badgeWarningBg: "#FEF3C7", badgeWarningText: "#92400E",
+    errorBg: "#FEF2F2", errorBorder: "#FECACA", errorText: "#991B1B",
+    successBg: "#F0FDF4", successBorder: "#BBF7D0", successText: "#166534",
+    warningText: "#92400E",
+    btnTheoryGrad: "linear-gradient(135deg, #DBEAFE, #93C5FD)", btnTheoryText: "#1E40AF",
+    btnPracticeGrad: "linear-gradient(135deg, #D1FAE5, #6EE7B7)", btnPracticeText: "#166534",
+    btnSelfStudyGrad: "linear-gradient(135deg, #EDE9FE, #C4B5FD)", btnSelfStudyText: "#5B21B6",
+    toastBg: "#FFFFFF", toastBorder: "#D1D5DB", toastWarnBg: "#FEF3C7", toastWarnBorder: "#F59E0B",
+    poolTheoryBg: "#EFF6FF", poolTheoryBorder: "#BFDBFE",
+    poolPracticeBg: "#ECFDF5", poolPracticeBorder: "#A7F3D0",
+    poolGoalsTheory: "#F0F7FF", poolGoalsPractice: "#F0FDF4",
+    milestoneBg1: "#FEF3C7", milestoneBorder1: "#F59E0B44",
+    milestoneBg2: "#F0FDF4", milestoneBorder2: "#BBF7D0",
+    deleteBg: "#FEE2E244", deleteText: "#991B1B",
+    shadow: "0 8px 32px rgba(0,0,0,0.1)", shadowLight: "0 12px 40px rgba(0,0,0,0.15)",
+    selectTheoryBg: "#DBEAFE66", selectTheoryBorder: "#BFDBFE",
+    selectTheoryAllBg: "#EFF6FF", selectTheoryAllBorder: "#DBEAFE", selectTheoryAllText: "#1E40AF",
+    selectSelfStudyBg: "#EDE9FE66", selectSelfStudyBorder: "#DDD6FE",
+    selectPracticeBg: "#D1FAE566", selectPracticeBorder: "#A7F3D0",
+  },
+};
+
+const BLOCK_COLORS_BY_THEME = {
+  dark: {
+    theory: { bg: "#0C1929", accent: "#3B82F6", text: "#E0ECFF", headerBg: "#152238", badge: "#1E3A5F" },
+    practice: { bg: "#0D1F12", accent: "#22C55E", text: "#D4FDDF", headerBg: "#142A18", badge: "#1A3D22" },
+    selfStudy: { bg: "#150D22", accent: "#A78BFA", text: "#E8DCFF", headerBg: "#1C1233", badge: "#2E1A50" },
+  },
+  light: {
+    theory: { bg: "#EFF6FF", accent: "#2563EB", text: "#1E3A5F", headerBg: "#DBEAFE", badge: "#BFDBFE" },
+    practice: { bg: "#ECFDF5", accent: "#16A34A", text: "#14532D", headerBg: "#D1FAE5", badge: "#A7F3D0" },
+    selfStudy: { bg: "#F5F3FF", accent: "#7C3AED", text: "#3B0764", headerBg: "#EDE9FE", badge: "#DDD6FE" },
+  },
 };
 
 // Sections allowed for self-study per bekendtgørelsen §25
@@ -362,6 +440,18 @@ const MAX_SELF_STUDY_LESSONS = 7;
 const MODULE_ICONS = { 1: "①", 2: "②", 3: "③", 4: "④", 5: "⑤" };
 
 export default function Lektionsopbygger() {
+  // Theme state
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem("lektionsopbygger_theme") || "light"; } catch { return "light"; }
+  });
+  const t = THEMES[theme];
+  const BLOCK_COLORS = BLOCK_COLORS_BY_THEME[theme];
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    try { localStorage.setItem("lektionsopbygger_theme", next); } catch {}
+  };
+
   // blocks: array of { id, type: 'theory'|'practice', name, lessons, items: [uid...] }
   const [blocks, setBlocks] = useState([]);
   const [activeModule, setActiveModule] = useState(1);
@@ -1311,8 +1401,8 @@ export default function Lektionsopbygger() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#080B12",
-      color: "#E5E7EB",
+      background: t.bgMain,
+      color: t.textPrimary,
       fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif",
       zoom: fontSize / 15,
     }}>
@@ -1321,90 +1411,58 @@ export default function Lektionsopbygger() {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: ${t.scrollThumb}; border-radius: 3px; }
         .drag-item { cursor: grab; user-select: none; transition: all 0.15s ease; }
         .drag-item:active { cursor: grabbing; }
         .drag-item:hover { transform: translateX(2px); }
         .dragging-along { opacity: 0.45; transform: scale(0.97); border-style: dashed !important; }
-        .drag-over { outline: 2px dashed #3B82F6 !important; outline-offset: -2px; background: #111827 !important; }
+        .drag-over { outline: 2px dashed #3B82F6 !important; outline-offset: -2px; background: ${t.bgDragOver} !important; }
         .block-drop { transition: outline 0.15s, background 0.15s; }
         .placed { opacity: 0.3; pointer-events: none; }
         .pool-item { border-radius: 8px; padding: 9px 13px; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
         .btn { border: none; cursor: pointer; font-family: inherit; border-radius: 6px; font-weight: 600; transition: all 0.12s; }
-        .btn:hover { filter: brightness(1.15); }
-        .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; letter-spacing: 0.03em; white-space: nowrap; }
+        .btn:hover { filter: brightness(${theme === "dark" ? "1.15" : "0.92"}); }
+        .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; letter-spacing: 0.03em; white-space: nowrap; }
         .block-card { border-radius: 12px; overflow: hidden; transition: all 0.2s; }
         .remove-btn { opacity: 0; transition: opacity 0.15s; }
         .pool-item:hover .remove-btn { opacity: 1; }
-        .module-tab { padding: 11px 18px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.15s; font-family: inherit; }
-        .module-tab:hover { filter: brightness(1.1); }
+        .module-tab { padding: 10px 16px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.15s; font-family: inherit; }
+        .module-tab:hover { filter: brightness(${theme === "dark" ? "1.1" : "0.95"}); }
+        .gradient-title {
+          font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 2px;
+          background: ${t.headerGradient};
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: transparent;
+        }
       `}</style>
 
       {/* Header */}
-      <div style={{ padding: "24px 32px 16px", borderBottom: "1px solid #1A1F2E" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ padding: "24px 32px 16px", borderBottom: `1px solid ${t.borderSubtle}` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 1400, margin: "0 auto" }}>
           <div>
-            <h1 style={{
-              fontSize: 22, fontWeight: 800, letterSpacing: "-0.03em",
-              color: "rgb(71,150,100)",
-              marginBottom: 2,
-            }}>
-              Forløbsplanlægger
+            <h1 className="gradient-title">
+              Lektionsopbygger
             </h1>
-            <p style={{ fontSize: 12, color: "#6B7280", ...(isSmall && { maxWidth: 300 }) }}>
-              Planlæg og strukturér dit undervisningsforløb efter BEK 1150 · Kategori B
+            <p style={{ fontSize: 12, color: t.textMuted }}>
+              Træk mål ind i teoriaftener og køretimer · Modulplan Kategori B 2026
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ position: "relative" }}>
-              <button className="btn" onClick={() => {
-                if (document.fullscreenElement) document.exitFullscreen();
-                else { document.documentElement.requestFullscreen(); dismissFsHint(); }
-              }} style={{
-                padding: "8px 14px", fontSize: 12, background: showFsHint ? "#1E3A5F" : "#1A1F2E", color: showFsHint ? "#93C5FD" : "#D1D5DB",
-                border: `1px solid ${showFsHint ? "#3B82F6" : "#333"}`,
-                transition: "all 0.3s",
-              }}>⛶ Fuld skærm</button>
-              {showFsHint && (
-                <div style={{
-                  position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)",
-                  marginTop: 8, background: "#1E3A5F", border: "1px solid #3B82F6",
-                  borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#D1D5DB",
-                  whiteSpace: "nowrap", zIndex: 999, boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-                  display: "flex", alignItems: "center", gap: 8,
-                }}>
-                  <span>Tip: Prøv fuld skærm for bedre overblik</span>
-                  <button className="btn" onClick={dismissFsHint} style={{
-                    padding: "2px 6px", fontSize: 10, background: "transparent", color: "#6B7280",
-                  }}>✕</button>
-                  <div style={{
-                    position: "absolute", top: -5, left: "50%", transform: "translateX(-50%) rotate(45deg)",
-                    width: 10, height: 10, background: "#1E3A5F", borderTop: "1px solid #3B82F6", borderLeft: "1px solid #3B82F6",
-                  }} />
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 2, background: "#1A1F2E", border: "1px solid #333", borderRadius: 6, padding: "2px" }}>
-              <button className="btn" onClick={() => changeFontSize(-1)} style={{
-                padding: "5px 10px", fontSize: 13, background: "transparent", color: "#D1D5DB",
-              }}>−</button>
-              <button className="btn" onClick={resetFontSize} title="Nulstil til automatisk" style={{
-                padding: "3px 6px", fontSize: 11, background: "transparent",
-                color: fontSizeOverridden ? "#93C5FD" : "#6B7280", minWidth: 28, textAlign: "center",
-              }}>🔍 {fontSize}</button>
-              <button className="btn" onClick={() => changeFontSize(1)} style={{
-                padding: "5px 10px", fontSize: 13, background: "transparent", color: "#D1D5DB",
-              }}>+</button>
-            </div>
-
-            <span style={{ width: 1, height: 24, background: "#333", flexShrink: 0, marginLeft: 16, marginRight: 16 }} />
+            {/* Theme toggle */}
+            <button className="btn" onClick={toggleTheme} style={{
+              padding: "8px 14px", fontSize: 12, background: t.bgElevated, color: t.textSecondary,
+              border: `1px solid ${t.border}`, display: "flex", alignItems: "center", gap: 6,
+            }} title={theme === "dark" ? "Skift til light mode" : "Skift til dark mode"}>
+              {theme === "dark" ? "☀️" : "🌙"} {theme === "dark" ? "Light" : "Dark"}
+            </button>
 
             {/* Plan manager */}
             <div style={{ position: "relative" }} ref={planMenuRef}>
               <button className="btn" onClick={() => setShowPlanMenu(v => !v)} style={{
-                padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
-                border: "1px solid #333", display: "flex", alignItems: "center", gap: 6,
+                padding: "8px 14px", fontSize: 12, background: t.bgElevated, color: t.textSecondary,
+                border: `1px solid ${t.border}`, display: "flex", alignItems: "center", gap: 6,
               }}>
                 💾 {currentPlanName || "Forløb"} ▾
               </button>
@@ -1412,12 +1470,13 @@ export default function Lektionsopbygger() {
               {showPlanMenu && (
                 <div style={{
                   position: "absolute", top: "100%", right: 0, marginTop: 6, zIndex: 999,
-                  background: "#141820", border: "1px solid #333", borderRadius: 10,
-                  width: 280, boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
+                  background: t.bgDropdown, border: `1px solid ${t.border}`, borderRadius: 10,
+                  width: 280, boxShadow: t.shadowLight,
                   overflow: "hidden",
                 }}>
-                  {/* Smart save */}
-                  <div style={{ padding: "12px 14px", borderBottom: "1px solid #1F2937" }}>
+                  {/* Save new */}
+                  <div style={{ padding: "12px 14px", borderBottom: `1px solid ${t.borderSubtle}` }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: t.textMuted, textTransform: "uppercase", marginBottom: 6 }}>Gem plan</div>
                     <div style={{ display: "flex", gap: 4 }}>
                       <input
                         value={planNameInput}
@@ -1425,24 +1484,32 @@ export default function Lektionsopbygger() {
                         onKeyDown={(e) => e.key === "Enter" && savePlan(planNameInput.trim() || currentPlanName || "Unavngivet")}
                         placeholder={currentPlanName || "Navngiv forløb..."}
                         style={{
-                          flex: 1, background: "#0D0F16", border: "1px solid #333", borderRadius: 6,
-                          padding: "6px 10px", fontSize: 12, color: "#E5E7EB", outline: "none",
+                          flex: 1, background: t.inputBg, border: `1px solid ${t.border}`, borderRadius: 6,
+                          padding: "6px 10px", fontSize: 12, color: t.textPrimary, outline: "none",
                           fontFamily: "inherit",
                         }}
                       />
-                      <button className="btn" onClick={() => savePlan(planNameInput.trim() || currentPlanName || "Unavngivet")} style={{
-                        padding: "6px 12px", fontSize: 11,
-                        background: planNameInput.trim() && planNameInput.trim() !== currentPlanName ? "#14532D" : "#1E3A5F",
-                        color: planNameInput.trim() && planNameInput.trim() !== currentPlanName ? "#86EFAC" : "#93C5FD",
-                      }}>{planNameInput.trim() && planNameInput.trim() !== currentPlanName ? "Gem som nyt" : currentPlanName ? "Opdatér" : "Gem"}</button>
+                      <button className="btn" onClick={() => savePlan(planNameInput || currentPlanName || "Unavngivet")} style={{
+                        padding: "6px 12px", fontSize: 11, background: t.badgeTheoryBg, color: t.badgeTheoryText,
+                      }}>Gem</button>
                     </div>
+                    {currentPlanName && (
+                      <div style={{ display: "flex", gap: 4, marginTop: 6 }}>
+                        <button className="btn" onClick={() => savePlan(currentPlanName)} style={{
+                          padding: "4px 10px", fontSize: 10, background: t.successBorder + "33", color: t.successText, flex: 1,
+                        }}>💾 Overskriv "{currentPlanName}"</button>
+                        <button className="btn" onClick={duplicatePlan} style={{
+                          padding: "4px 10px", fontSize: 10, background: t.bgElevated, color: t.textMuted, border: `1px solid ${t.border}`,
+                        }}>📋 Kopiér</button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Saved plans list */}
                   <div style={{ maxHeight: 240, overflow: "auto" }}>
                     {Object.keys(savedPlans).length === 0 ? (
-                      <div style={{ padding: "16px 14px", color: "#4B5563", fontSize: 12, textAlign: "center" }}>
-                        Ingen gemte forløb endnu
+                      <div style={{ padding: "16px 14px", color: t.textDim, fontSize: 12, textAlign: "center" }}>
+                        Ingen gemte planer endnu
                       </div>
                     ) : (
                       Object.entries(savedPlans)
@@ -1454,18 +1521,18 @@ export default function Lektionsopbygger() {
                             style={{
                               padding: "10px 14px", cursor: "pointer",
                               display: "flex", alignItems: "center", gap: 8,
-                              borderBottom: "1px solid #1A1F2E",
-                              background: name === currentPlanName ? "#1E3A5F22" : "transparent",
+                              borderBottom: `1px solid ${t.borderSubtle}`,
+                              background: name === currentPlanName ? t.badgeTheoryBg + "22" : "transparent",
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = "#1A1F2E"}
-                            onMouseLeave={(e) => e.currentTarget.style.background = name === currentPlanName ? "#1E3A5F22" : "transparent"}
+                            onMouseEnter={(e) => e.currentTarget.style.background = t.bgElevated}
+                            onMouseLeave={(e) => e.currentTarget.style.background = name === currentPlanName ? t.badgeTheoryBg + "22" : "transparent"}
                           >
                             <span style={{ fontSize: 14 }}>{name === currentPlanName ? "📌" : "📄"}</span>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 12, fontWeight: 600, color: "#E5E7EB", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              <div style={{ fontSize: 12, fontWeight: 600, color: t.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                 {name}
                               </div>
-                              <div style={{ fontSize: 10, color: "#6B7280" }}>
+                              <div style={{ fontSize: 10, color: t.textMuted }}>
                                 {plan.blocks.length} blokke · {plan.savedAt ? new Date(plan.savedAt).toLocaleDateString("da-DK", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : ""}
                               </div>
                             </div>
@@ -1473,7 +1540,7 @@ export default function Lektionsopbygger() {
                               padding: "3px 6px", fontSize: 10, background: "transparent", color: "#6B7280",
                             }} title="Omdøb">✏️</button>
                             <button className="btn" onClick={(e) => deletePlan(name, e)} style={{
-                              padding: "3px 6px", fontSize: 10, background: "transparent", color: "#6B7280",
+                              padding: "3px 6px", fontSize: 10, background: "transparent", color: t.textMuted,
                             }} title="Slet">✕</button>
                           </div>
                         ))
@@ -1512,19 +1579,14 @@ export default function Lektionsopbygger() {
             </div>
 
             <button className="btn" onClick={printPlan} style={{
-              padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#D1D5DB",
-              border: "1px solid #333",
-            }}>{isSmall ? "🖨 PDF" : "🖨 Eksportér PDF"}</button>
-
-            <a href="#plangraf" className="btn" style={{
-              padding: "8px 14px", fontSize: 12, background: "#1A1F2E", color: "#C4B5FD",
-              border: "1px solid #333", textDecoration: "none", display: "inline-flex", alignItems: "center",
-            }}>{isSmall ? "🧭 Overblik" : "🧭 Forløbsoverblik"}</a>
+              padding: "8px 14px", fontSize: 12, background: t.bgElevated, color: t.textSecondary,
+              border: `1px solid ${t.border}`,
+            }}>🖨 Eksportér</button>
 
             <button className="btn" onClick={() => setShowValidation(v => !v)} style={{
               padding: "8px 16px", fontSize: 12,
-              background: validation.errors.length > 0 ? "#7F1D1D" : "#14532D",
-              color: validation.errors.length > 0 ? "#FCA5A5" : "#86EFAC",
+              background: validation.errors.length > 0 ? t.errorBorder : t.successBorder,
+              color: validation.errors.length > 0 ? t.errorText : t.successText,
             }}>
               {validation.errors.length > 0 ? `⚠ ${validation.errors.length} fejl` : "✓ Ingen fejl"}
             </button>
@@ -1536,17 +1598,17 @@ export default function Lektionsopbygger() {
       {showValidation && (validation.errors.length > 0 || validation.warnings.length > 0) && (
         <div style={{ padding: "12px 32px" }}>
           <div style={{
-            background: validation.errors.length > 0 ? "#1C0A0A" : "#0A1C0D",
-            border: `1px solid ${validation.errors.length > 0 ? "#7F1D1D" : "#14532D"}`,
+            background: validation.errors.length > 0 ? t.errorBg : t.successBg,
+            border: `1px solid ${validation.errors.length > 0 ? t.errorBorder : t.successBorder}`,
             borderRadius: 10, padding: 16,
           }}>
             {validation.errors.map((e, i) => (
-              <div key={i} style={{ fontSize: 12, color: "#FCA5A5", marginBottom: 4, display: "flex", gap: 6, alignItems: "flex-start" }}>
+              <div key={i} style={{ fontSize: 12, color: t.errorText, marginBottom: 4, display: "flex", gap: 6, alignItems: "flex-start" }}>
                 <span>❌</span><span>{e}</span>
               </div>
             ))}
             {validation.warnings.map((w, i) => (
-              <div key={i} style={{ fontSize: 12, color: "#FDE68A", marginBottom: 4, display: "flex", gap: 6, alignItems: "flex-start" }}>
+              <div key={i} style={{ fontSize: 12, color: t.warningText, marginBottom: 4, display: "flex", gap: 6, alignItems: "flex-start" }}>
                 <span>⚠️</span><span>{w}</span>
               </div>
             ))}
@@ -1559,7 +1621,7 @@ export default function Lektionsopbygger() {
 
         {/* LEFT: Goal pool */}
         <div style={{
-          width: window.innerWidth < 1380 ? 340 : 420, flexShrink: 0, borderRight: "1px solid #1A1F2E",
+          width: 380, flexShrink: 0, borderRight: `1px solid ${t.borderSubtle}`,
           display: "flex", flexDirection: "column", overflow: "hidden",
         }}
           onDragOver={e => e.preventDefault()}
@@ -1573,16 +1635,16 @@ export default function Lektionsopbygger() {
               const modPlaced = modItemsAll.filter(i => placedUids.has(i.uid)).length;
               const pct = modItemsAll.length > 0 ? Math.round(modPlaced / modItemsAll.length * 100) : 0;
               return (
-                <button key={mod.id} className="module-tab" onClick={() => { setActiveModule(mod.id); setSelectedUids(new Set()); }} style={{
-                  background: isActive ? mod.color + "22" : "#111318",
-                  borderColor: isActive ? mod.color : "#1A1F2E",
-                  color: isActive ? mod.color : "#6B7280",
+                <button key={mod.id} className="module-tab" onClick={() => { setActiveModule(mod.id); setFilterModule(mod.id); setSelectedUids(new Set()); }} style={{
+                  background: isActive ? mod.color + "22" : t.bgSurface,
+                  borderColor: isActive ? mod.color : t.borderSubtle,
+                  color: isActive ? mod.color : t.textMuted,
                 }}>
                   <span style={{ marginRight: 4 }}>Modul {mod.id}</span>
                   <span style={{
                     fontSize: 10, padding: "1px 5px", borderRadius: 99, marginLeft: 2,
-                    background: pct === 100 ? "#14532D" : mod.color + "22",
-                    color: pct === 100 ? "#86EFAC" : mod.color,
+                    background: pct === 100 ? t.successBorder : mod.color + "22",
+                    color: pct === 100 ? t.successText : mod.color,
                   }}>{pct}%</span>
                 </button>
               );
@@ -1597,13 +1659,19 @@ export default function Lektionsopbygger() {
                 color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
                 fontWeight: 800, fontSize: 14, fontFamily: "'DM Mono', monospace",
               }}>{activeModule}</div>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#F3F4F6" }}>{currentModule.title}</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: t.textBright }}>{currentModule.title}</span>
             </div>
-            {currentModule.practiceNote && (
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                <span className="badge" style={{ background: "#422006", color: "#FCD34D" }}>⚠ {currentModule.practiceNote}</span>
-              </div>
-            )}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <span className="badge" style={{ background: t.badgeTheoryBg, color: t.badgeTheoryText }}>📖 {currentModule.theory}T krævet</span>
+              <span className="badge" style={{ background: t.badgePracticeBg, color: t.badgePracticeText }}>🚗 {currentModule.practice}P krævet</span>
+              {currentModule.practiceNote && <span className="badge" style={{ background: t.badgeWarningBg, color: t.badgeWarningText }}>⚠ {currentModule.practiceNote}</span>}
+              <span className="badge" style={{
+                background: t.bgSurface,
+                color: t.badgeNeutralText, border: `1px solid ${t.border}`,
+              }}>
+                Tildelt: {Math.round(moduleCounts[activeModule]?.theory || 0)}T + {Math.round(moduleCounts[activeModule]?.practice || 0)}P
+              </span>
+            </div>
           </div>
 
           {/* Items pool - scrollable */}
@@ -1625,30 +1693,30 @@ export default function Lektionsopbygger() {
                     disabled={totalUnplaced === 0}
                     style={{ width: 15, height: 15, cursor: "pointer", accentColor: currentModule.color }}
                   />
-                  <span style={{ fontSize: 12, color: "#6B7280", marginRight: 2 }}>Alle</span>
+                  <span style={{ fontSize: 10, color: t.textMuted, marginRight: 2 }}>Alle</span>
                   {unplacedTheory.length > 0 && unplacedSelfStudy.length > 0 && unplacedTheoryOnly.length > 0 && (
                     <button className="btn" onClick={() => selectAllInModule("theoryAll")} style={{
-                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#1E3A5F44", color: "#93C5FD", border: "1px solid #1E3A5F66", borderRadius: 6,
+                      padding: "2px 6px", fontSize: 9, background: t.selectTheoryBg, color: t.badgeTheoryText, border: `1px solid ${t.selectTheoryBorder}`,
                     }}>📖+📚 {unplacedTheory.length}</button>
                   )}
                   {unplacedTheoryOnly.length > 0 && (
                     <button className="btn" onClick={() => selectAllInModule("theoryOnly")} style={{
-                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#1E3A5F33", color: "#93C5FD", border: "1px solid #1E3A5F55", borderRadius: 6,
+                      padding: "2px 6px", fontSize: 9, background: t.selectTheoryAllBg, color: t.selectTheoryAllText, border: `1px solid ${t.selectTheoryAllBorder}`,
                     }}>📖 {unplacedTheoryOnly.length}</button>
                   )}
                   {unplacedSelfStudy.length > 0 && (
                     <button className="btn" onClick={() => selectAllInModule("selfStudy")} style={{
-                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#3B076444", color: "#C4B5FD", border: "1px solid #3B076466", borderRadius: 6,
+                      padding: "2px 6px", fontSize: 9, background: t.selectSelfStudyBg, color: t.badgeSelfStudyText, border: `1px solid ${t.selectSelfStudyBorder}`,
                     }}>📚 {unplacedSelfStudy.length}</button>
                   )}
                   {unplacedPractice.length > 0 && (
                     <button className="btn" onClick={() => selectAllInModule("practice")} style={{
-                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#14532D44", color: "#86EFAC", border: "1px solid #14532D66", borderRadius: 6,
+                      padding: "2px 6px", fontSize: 9, background: t.selectPracticeBg, color: t.badgePracticeText, border: `1px solid ${t.selectPracticeBorder}`,
                     }}>🚗 {unplacedPractice.length}</button>
                   )}
                   {selectedUids.size > 0 && (
                     <button className="btn" onClick={clearSelection} style={{
-                      padding: "4px 10px", fontSize: 11, fontWeight: 600, background: "#33333388", color: "#9CA3AF", marginLeft: "auto", borderRadius: 6,
+                      padding: "2px 6px", fontSize: 9, background: t.border + "66", color: t.badgeNeutralText, marginLeft: "auto",
                     }}>✕ {selectedUids.size}</button>
                   )}
                 </div>
@@ -1657,7 +1725,7 @@ export default function Lektionsopbygger() {
 
             {theoryItems.length > 0 && (
               <>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", padding: "8px 4px 6px" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", padding: "8px 4px 6px" }}>
                   📖 Teorimål
                 </div>
                 {theoryItems.map(item => (
@@ -1668,13 +1736,14 @@ export default function Lektionsopbygger() {
                     selected={selectedUids.has(item.uid)}
                     onToggleSelect={() => toggleSelect(item.uid)}
                     isDraggingAlong={dragItem && dragItem !== item.uid && selectedUids.has(item.uid) && selectedUids.has(dragItem)}
-                    dragCount={dragItem === item.uid && selectedUids.has(item.uid) ? selectedUids.size : 0} />
+                    dragCount={dragItem === item.uid && selectedUids.has(item.uid) ? selectedUids.size : 0}
+                    t={t} />
                 ))}
               </>
             )}
             {practiceItems.length > 0 && (
               <>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", padding: "16px 4px 6px" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", padding: "16px 4px 6px" }}>
                   🚗 Praksismål
                 </div>
                 {practiceItems.map(item => (
@@ -1685,7 +1754,8 @@ export default function Lektionsopbygger() {
                     selected={selectedUids.has(item.uid)}
                     onToggleSelect={() => toggleSelect(item.uid)}
                     isDraggingAlong={dragItem && dragItem !== item.uid && selectedUids.has(item.uid) && selectedUids.has(dragItem)}
-                    dragCount={dragItem === item.uid && selectedUids.has(item.uid) ? selectedUids.size : 0} />
+                    dragCount={dragItem === item.uid && selectedUids.has(item.uid) ? selectedUids.size : 0}
+                    t={t} />
                 ))}
               </>
             )}
@@ -1694,17 +1764,17 @@ export default function Lektionsopbygger() {
           {/* Bulk action bar — fixed at bottom of left panel */}
           {selectedUids.size > 0 && (
             <div style={{
-              flexShrink: 0, borderTop: "1px solid #1A1F2E",
-              background: "#111318", padding: "8px 12px",
+              flexShrink: 0, borderTop: `1px solid ${t.borderSubtle}`,
+              background: t.bgSurface, padding: "8px 12px",
               display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap",
             }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#F3F4F6" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: t.textBright }}>
                 {selectedUids.size} valgt
               </span>
               <button className="btn" onClick={clearSelection} style={{
-                padding: "3px 8px", fontSize: 10, background: "#333", color: "#9CA3AF",
+                padding: "3px 8px", fontSize: 10, background: t.border, color: t.badgeNeutralText,
               }}>✕</button>
-              <span style={{ fontSize: 10, color: "#6B7280" }}>→</span>
+              <span style={{ fontSize: 10, color: t.textMuted }}>→</span>
               {blocks.map((block, idx) => {
                 const accent = BLOCK_COLORS[block.type]?.accent || "#666";
                 return (
@@ -1717,7 +1787,7 @@ export default function Lektionsopbygger() {
                 );
               })}
               {blocks.length === 0 && (
-                <span style={{ fontSize: 10, color: "#6B7280", fontStyle: "italic" }}>Opret en blok først</span>
+                <span style={{ fontSize: 10, color: t.textMuted, fontStyle: "italic" }}>Opret en blok først</span>
               )}
             </div>
           )}
@@ -1726,20 +1796,20 @@ export default function Lektionsopbygger() {
 
           {/* View mode toggle */}
           <div style={{
-            display: "flex", gap: 0, marginBottom: 16, background: "#111318", borderRadius: 10, padding: 3,
+            display: "flex", gap: 0, marginBottom: 16, background: t.bgSurface, borderRadius: 10, padding: 3,
           }}>
             <button className="btn" onClick={() => setViewMode("build")} style={{
               flex: 1, padding: "9px 16px", fontSize: 13, borderRadius: 8,
-              background: viewMode === "build" ? "#1A1F2E" : "transparent",
-              color: viewMode === "build" ? "#F3F4F6" : "#6B7280",
+              background: viewMode === "build" ? t.bgElevated : "transparent",
+              color: viewMode === "build" ? t.textBright : t.textMuted,
               boxShadow: viewMode === "build" ? "0 1px 4px #0003" : "none",
             }}>
               🔧 Opbyg
             </button>
             <button className="btn" onClick={() => setViewMode("summary")} style={{
               flex: 1, padding: "9px 16px", fontSize: 13, borderRadius: 8,
-              background: viewMode === "summary" ? "#1A1F2E" : "transparent",
-              color: viewMode === "summary" ? "#F3F4F6" : "#6B7280",
+              background: viewMode === "summary" ? t.bgElevated : "transparent",
+              color: viewMode === "summary" ? t.textBright : t.textMuted,
               boxShadow: viewMode === "summary" ? "0 1px 4px #0003" : "none",
             }}>
               📋 Se forløb
@@ -1752,19 +1822,19 @@ export default function Lektionsopbygger() {
               <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
                 <button className="btn" onClick={() => addBlock("theory")} style={{
                   padding: "10px 20px", fontSize: 13,
-                  background: "linear-gradient(135deg, #1E3A5F, #1E40AF)", color: "#93C5FD",
-                }}>+ Teori</button>
+                  background: t.btnTheoryGrad, color: t.btnTheoryText,
+                }}>+ Teoriaften</button>
                 <button className="btn" onClick={() => addBlock("practice")} style={{
                   padding: "10px 20px", fontSize: 13,
-                  background: "linear-gradient(135deg, #14532D, #166534)", color: "#86EFAC",
-                }}>+ Kørsel</button>
+                  background: t.btnPracticeGrad, color: t.btnPracticeText,
+                }}>+ Køretime</button>
                 <button className="btn" onClick={() => addBlock("selfStudy")} style={{
                   padding: "10px 20px", fontSize: 13,
-                  background: "linear-gradient(135deg, #2E1A50, #5B21B6)", color: "#C4B5FD",
+                  background: t.btnSelfStudyGrad, color: t.btnSelfStudyText,
                 }}>+ Selvstudium</button>
                 <div style={{ flex: 1 }} />
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 11, color: "#6B7280" }}>
+                  <span style={{ fontSize: 11, color: t.textMuted }}>
                     {blocks.length} blokke · {blocks.reduce((s, b) => s + b.lessons, 0)} lektioner
                   </span>
                   {(() => {
@@ -1772,8 +1842,8 @@ export default function Lektionsopbygger() {
                     const ok = ssLessons <= MAX_SELF_STUDY_LESSONS;
                     return ssLessons > 0 ? (
                       <span className="badge" style={{
-                        background: ok ? "#2E1A50" : "#7F1D1D",
-                        color: ok ? "#C4B5FD" : "#FCA5A5",
+                        background: ok ? t.badgeSelfStudyBg : t.errorBorder,
+                        color: ok ? t.badgeSelfStudyText : t.errorText,
                         fontSize: 11, padding: "3px 8px",
                       }}>
                         📚 {ssLessons}/{MAX_SELF_STUDY_LESSONS} selvstudium {ok ? "" : "⚠ OVER MAX"}
@@ -1783,48 +1853,93 @@ export default function Lektionsopbygger() {
                 </div>
               </div>
 
-              {/* Module lesson overview — only active module */}
-              {(() => {
-                const mod = MODULES_RAW.find(m => m.id === activeModule);
-                if (!mod) return null;
-                const tc = Math.round(moduleCounts[mod.id]?.theory || 0);
-                const pc = Math.round(moduleCounts[mod.id]?.practice || 0);
-                const ss = Math.round(moduleCounts[mod.id]?.selfStudy || 0);
-                const tOk = tc >= mod.theory;
-                const pOk = pc >= mod.practice;
-                return (
+              {/* Filter bar — single row */}
+              <div style={{
+                display: "flex", gap: 4, marginBottom: 12, alignItems: "center",
+                overflowX: "auto", paddingBottom: 2,
+              }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: t.textDim, textTransform: "uppercase", letterSpacing: "0.08em", marginRight: 2, flexShrink: 0 }}>
+                  Vis:
+                </span>
+                {/* Module filter */}
+                {[{ v: "all", label: "Alle moduler" }, ...MODULES_RAW.map(m => ({ v: m.id, label: `M${m.id}`, color: m.color }))].map(f => (
+                  <button key={f.v} className="btn" onClick={() => setFilterModule(f.v)} style={{
+                    padding: "4px 9px", fontSize: 11, borderRadius: 6, flexShrink: 0,
+                    background: filterModule === f.v ? (f.color || t.bgElevated) + (f.color ? "33" : "") : t.bgSurface,
+                    color: filterModule === f.v ? (f.color || t.textBright) : t.textMuted,
+                    border: `1px solid ${filterModule === f.v ? (f.color || t.border) + "66" : t.borderSubtle}`,
+                  }}>{f.label}</button>
+                ))}
+                <span style={{ width: 1, height: 18, background: t.borderSubtle, margin: "0 4px", flexShrink: 0 }} />
+                {/* Type filter — same line */}
+                {[
+                  { v: "all", label: "Alle typer" },
+                  { v: "theory", label: "📖 Teori", color: "#3B82F6" },
+                  { v: "practice", label: "🚗 Praksis", color: "#22C55E" },
+                  { v: "selfStudy", label: "📚 Selvstudium", color: "#A78BFA" },
+                ].map(f => (
+                  <button key={f.v} className="btn" onClick={() => setFilterType(f.v)} style={{
+                    padding: "4px 9px", fontSize: 11, borderRadius: 6, flexShrink: 0,
+                    background: filterType === f.v ? (f.color ? f.color + "22" : t.bgElevated) : t.bgSurface,
+                    color: filterType === f.v ? (f.color || t.textBright) : t.textMuted,
+                    border: `1px solid ${filterType === f.v ? (f.color ? f.color + "66" : t.border) : t.borderSubtle}`,
+                  }}>{f.label}</button>
+                ))}
+              </div>
+
+              {/* Module lesson overview */}
               <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-                    <div style={{
-                      background: "#111318", border: `1px solid ${mod.color}33`,
+                {MODULES_RAW.filter(mod => filterModule === "all" || mod.id === filterModule).map(mod => {
+                  const tc = Math.round(moduleCounts[mod.id]?.theory || 0);
+                  const pc = Math.round(moduleCounts[mod.id]?.practice || 0);
+                  const ss = Math.round(moduleCounts[mod.id]?.selfStudy || 0);
+                  const tOk = tc >= mod.theory;
+                  const pOk = pc >= mod.practice;
+                  return (
+                    <div key={mod.id} style={{
+                      background: t.bgSurface, border: `1px solid ${mod.color}33`,
                       borderRadius: 8, padding: "6px 10px", fontSize: 11, minWidth: 130,
                     }}>
                       <div style={{ fontWeight: 700, color: mod.color, marginBottom: 2, fontFamily: "'DM Mono', monospace" }}>
                         Modul {mod.id}
                       </div>
-                      <div style={{ color: tOk ? "#86EFAC" : "#FCA5A5" }}>
-                        {tc}/{mod.theory} Teori {tOk ? "✓" : ""} {ss > 0 ? `(${ss} selvst.)` : ""}
+                      <div style={{ color: tOk ? t.successText : t.errorText }}>
+                        📖 {tc}/{mod.theory}T {tOk ? "✓" : ""} {ss > 0 ? `(${ss} selvst.)` : ""}
                       </div>
-                      <div style={{ color: pOk ? "#86EFAC" : mod.practice === 0 ? "#6B7280" : "#FCA5A5" }}>
-                        {pc}/{mod.practice} Praksis {pOk ? "✓" : ""}
+                      <div style={{ color: pOk ? t.successText : mod.practice === 0 ? t.textMuted : t.errorText }}>
+                        🚗 {pc}/{mod.practice}P {pOk ? "✓" : ""}
                       </div>
                     </div>
+                  );
+                })}
               </div>
-                );
-              })()}
 
               {/* Blocks */}
               {(() => {
                 return (
                   <>
+                    {hiddenCount > 0 && (
+                      <div style={{
+                        padding: "8px 12px", marginBottom: 8, borderRadius: 8,
+                        background: t.bgSurface, border: `1px solid ${t.borderSubtle}`,
+                        fontSize: 11, color: t.textMuted, display: "flex", alignItems: "center", gap: 6,
+                      }}>
+                        <span>🔍</span>
+                        <span>Viser {filtered.length} af {blocks.length} blokke — {hiddenCount} skjult af filter</span>
+                        <button className="btn" onClick={() => { setFilterModule("all"); setFilterType("all"); }} style={{
+                          padding: "3px 8px", fontSize: 10, background: t.bgElevated, color: t.badgeNeutralText, marginLeft: "auto",
+                        }}>Nulstil filter</button>
+                      </div>
+                    )}
                     {blocks.length === 0 && (
                       <div
                         onDragOver={(e) => { e.preventDefault(); setDragOverNewBlock(true); }}
                         onDragLeave={() => setDragOverNewBlock(false)}
                         onDrop={(e) => { e.preventDefault(); setDragOverNewBlock(false); onDropToNewBlock(); }}
                         style={{
-                          padding: 60, textAlign: "center", color: dragOverNewBlock ? "#93C5FD" : "#4B5563",
-                          border: `2px dashed ${dragOverNewBlock ? "#3B82F6" : "#1A1F2E"}`,
-                          borderRadius: 16, background: dragOverNewBlock ? "#111827" : "#0D0F16",
+                          padding: 60, textAlign: "center", color: dragOverNewBlock ? t.badgeTheoryText : t.textDim,
+                          border: `2px dashed ${dragOverNewBlock ? "#3B82F6" : t.borderSubtle}`,
+                          borderRadius: 16, background: dragOverNewBlock ? t.bgDragOver : t.bgDeep,
                           transition: "all 0.15s",
                         }}
                       >
@@ -1881,7 +1996,7 @@ export default function Lektionsopbygger() {
                               transition: "opacity 0.15s, transform 0.15s",
                             }}>
                               <BlockCard
-                                key={block.id} block={block} index={globalIdx}
+                                key={block.id} block={block} index={globalIdx} t={t} theme={theme}
                                 onRemove={() => removeBlock(block.id)}
                                 onUpdateLessons={(l) => updateBlockLessons(block.id, l)}
                                 onUpdateName={(n) => updateBlockName(block.id, n)}
@@ -1936,10 +2051,10 @@ export default function Lektionsopbygger() {
                           onDrop={(e) => { e.preventDefault(); setDragOverNewBlock(false); onDropToNewBlock(); }}
                           style={{
                             marginTop: 12, padding: "32px 16px", textAlign: "center",
-                            border: `2px dashed ${dragOverNewBlock ? accentColor : "#333"}`,
+                            border: `2px dashed ${dragOverNewBlock ? accentColor : t.border}`,
                             borderRadius: 12,
                             background: dragOverNewBlock ? accentColor + "11" : "transparent",
-                            color: dragOverNewBlock ? accentColor : "#4B5563",
+                            color: dragOverNewBlock ? accentColor : t.textDim,
                             fontSize: 13, fontWeight: 600,
                             transition: "all 0.15s",
                           }}
@@ -1956,23 +2071,24 @@ export default function Lektionsopbygger() {
 
               {/* Rules footer */}
               <div style={{
-                marginTop: 24, background: "#0D0F16", borderRadius: 12, padding: 20,
-                border: "1px solid #1A1F2E", fontSize: 12, color: "#6B7280", lineHeight: 1.8,
+                marginTop: 24, background: t.bgDeep, borderRadius: 12, padding: 20,
+                border: `1px solid ${t.borderSubtle}`, fontSize: 12, color: t.textMuted, lineHeight: 1.8,
               }}>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, color: "#4B5563" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, color: t.textDim }}>
                   Regler · BEK 1150
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <span style={{ color: "#93C5FD" }}>📖 Teori:</span> Max 4 lektioner/dag<br />
-                    <span style={{ color: "#86EFAC" }}>🚗 Kørsel:</span> Max 3 lektioner/dag<br />
+                    <span style={{ color: t.badgeTheoryText }}>📖 Teoriaften:</span> Max 4 lektioner/dag<br />
+                    <span style={{ color: t.badgePracticeText }}>🚗 Køretime:</span> Max 2 lektioner/dag (normal)<br />
+                    <span style={{ color: t.badgeWarningText }}>⭐ Motorvej/mørke/øvelsesplads:</span> Max 3 lektioner/dag<br />
                     <span style={{ color: "#F472B6" }}>🏎️ KTA:</span> Max 4 lektioner/dag
                   </div>
                   <div>
-                    <span style={{ color: "#FCA5A5" }}>⚡ Rækkefølge:</span> Teori FØR praksis altid<br />
-                    <span style={{ color: "#FCA5A5" }}>⚡ Modul 3 regel:</span> 7.1–7.8 praksis FØR kryds<br />
-                    <span style={{ color: "#C4B5FD" }}>📚 Selvstudium:</span> Max 7 lektioner total<br />
-                    <span style={{ color: "#9CA3AF" }}>📅 Min. 14 undervisningsdage</span>
+                    <span style={{ color: t.errorText }}>⚡ Rækkefølge:</span> Teori FØR praksis altid<br />
+                    <span style={{ color: t.errorText }}>⚡ M3 gate:</span> 7.1–7.8 praksis FØR kryds<br />
+                    <span style={{ color: t.badgeSelfStudyText }}>📚 Selvstudium:</span> Max 7 lektioner total<br />
+                    <span style={{ color: t.badgeNeutralText }}>📅 Min. 14 undervisningsdage</span>
                   </div>
                 </div>
               </div>
@@ -1981,7 +2097,7 @@ export default function Lektionsopbygger() {
             /* ═══════════════════════════════════════════════════
                SUMMARY VIEW
                ═══════════════════════════════════════════════════ */
-            <SummaryView blocks={blocks} moduleCounts={moduleCounts} validation={validation} />
+            <SummaryView blocks={blocks} moduleCounts={moduleCounts} validation={validation} t={t} theme={theme} />
           )}
         </div>
       </div>
@@ -1994,11 +2110,11 @@ export default function Lektionsopbygger() {
             position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
             zIndex: 9999, maxWidth: 480, width: "90%",
             padding: "12px 20px", borderRadius: 12,
-            background: toast.type === "warn" ? "#422006" : "#1A1F2E",
-            border: `1px solid ${toast.type === "warn" ? "#92400E" : "#333"}`,
-            color: toast.type === "warn" ? "#FDE68A" : "#E5E7EB",
+            background: toast.type === "warn" ? t.toastWarnBg : t.toastBg,
+            border: `1px solid ${toast.type === "warn" ? t.toastWarnBorder : t.toastBorder}`,
+            color: toast.type === "warn" ? t.warningText : t.textPrimary,
             fontSize: 13, fontWeight: 500, lineHeight: 1.5,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+            boxShadow: t.shadow,
             cursor: "pointer",
             animation: "toast-in 0.25s ease",
             display: "flex", alignItems: "flex-start", gap: 10,
@@ -2008,7 +2124,7 @@ export default function Lektionsopbygger() {
             {toast.type === "warn" ? "⚡" : "ℹ️"}
           </span>
           <span style={{ flex: 1 }}>{toast.msg}</span>
-          <span style={{ color: "#6B7280", fontSize: 11, flexShrink: 0, marginTop: 2 }}>✕</span>
+          <span style={{ color: t.textMuted, fontSize: 11, flexShrink: 0, marginTop: 2 }}>✕</span>
         </div>
       )}
 
@@ -2026,7 +2142,8 @@ export default function Lektionsopbygger() {
 // SUMMARY VIEW — full course overview
 // ─────────────────────────────────────────────────────────
 
-function SummaryView({ blocks, moduleCounts, validation }) {
+function SummaryView({ blocks, moduleCounts, validation, t, theme }) {
+  const BLOCK_COLORS = BLOCK_COLORS_BY_THEME[theme];
   const totalT = blocks.filter(b => b.type === "theory" || b.type === "selfStudy").reduce((s, b) => s + b.lessons, 0);
   const totalP = blocks.filter(b => b.type === "practice").reduce((s, b) => s + b.lessons, 0);
   const totalSS = blocks.filter(b => b.type === "selfStudy").reduce((s, b) => s + b.lessons, 0);
@@ -2041,35 +2158,34 @@ function SummaryView({ blocks, moduleCounts, validation }) {
       const item = findItem(uid);
       if (item) moduleIds.add(item.moduleId);
     });
-    // Assign to primary module (first found), or "unassigned"
     const primaryModule = moduleIds.size > 0 ? Math.min(...moduleIds) : 0;
     if (!blocksByModule[primaryModule]) blocksByModule[primaryModule] = [];
     blocksByModule[primaryModule].push({ ...block, globalIdx: idx });
   });
 
   const typeIcon = { theory: "📖", practice: "🚗", selfStudy: "📚" };
-  const typeLabel = { theory: "Teori", practice: "Kørsel", selfStudy: "Selvstudium" };
-  const typeBg = { theory: "#0C1929", practice: "#0D1F12", selfStudy: "#150D22" };
-  const typeAccent = { theory: "#3B82F6", practice: "#22C55E", selfStudy: "#A78BFA" };
+  const typeLabel = { theory: "Teoriaften", practice: "Køretime", selfStudy: "Selvstudium" };
+  const typeBg = { theory: BLOCK_COLORS.theory.bg, practice: BLOCK_COLORS.practice.bg, selfStudy: BLOCK_COLORS.selfStudy.bg };
+  const typeAccent = { theory: BLOCK_COLORS.theory.accent, practice: BLOCK_COLORS.practice.accent, selfStudy: BLOCK_COLORS.selfStudy.accent };
 
   return (
     <div>
       {/* Status banner */}
       <div style={{
         padding: "16px 20px", borderRadius: 12, marginBottom: 20,
-        background: hasErrors ? "#1C0A0A" : "#0A1C0D",
-        border: `1px solid ${hasErrors ? "#7F1D1D" : "#14532D"}`,
+        background: hasErrors ? t.errorBg : t.successBg,
+        border: `1px solid ${hasErrors ? t.errorBorder : t.successBorder}`,
         display: "flex", alignItems: "center", gap: 12,
       }}>
         <span style={{ fontSize: 24 }}>{hasErrors ? "⚠️" : "✅"}</span>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: hasErrors ? "#FCA5A5" : "#86EFAC" }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: hasErrors ? t.errorText : t.successText }}>
             {hasErrors ? `${validation.errors.length} regelfejl fundet` : "Forløbet overholder alle regler"}
           </div>
-          <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>
+          <div style={{ fontSize: 11, color: t.textMuted, marginTop: 2 }}>
             {totalT} teori ({totalSS} selvstudium) + {totalP} praksis = {totalAll} lektioner
-            {totalAll < 54 && <span style={{ color: "#FCA5A5" }}> — mangler {54 - totalAll} for at nå minimum 54</span>}
-            {totalAll >= 54 && <span style={{ color: "#86EFAC" }}> ✓</span>}
+            {totalAll < 54 && <span style={{ color: t.errorText }}> — mangler {54 - totalAll} for at nå minimum 54</span>}
+            {totalAll >= 54 && <span style={{ color: t.successText }}> ✓</span>}
           </div>
         </div>
       </div>
@@ -2077,18 +2193,18 @@ function SummaryView({ blocks, moduleCounts, validation }) {
       {/* Overall stats grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 20 }}>
         {[
-          { label: "Teoriblokke", value: blocks.filter(b => b.type === "theory").length, sub: `${blocks.filter(b => b.type === "theory").reduce((s, b) => s + b.lessons, 0)} lektioner`, icon: "📖", accent: "#3B82F6" },
-          { label: "Selvstudium", value: blocks.filter(b => b.type === "selfStudy").length, sub: `${totalSS}/${MAX_SELF_STUDY_LESSONS} lektioner`, icon: "📚", accent: "#A78BFA" },
-          { label: "Kørselsblokke", value: blocks.filter(b => b.type === "practice").length, sub: `${totalP} lektioner`, icon: "🚗", accent: "#22C55E" },
-          { label: "I alt", value: totalAll, sub: `${blocks.length} blokke`, icon: "Σ", accent: "#9CA3AF" },
+          { label: "Teoriaftener", value: blocks.filter(b => b.type === "theory").length, sub: `${blocks.filter(b => b.type === "theory").reduce((s, b) => s + b.lessons, 0)} lektioner`, icon: "📖", accent: BLOCK_COLORS.theory.accent },
+          { label: "Køretimer", value: blocks.filter(b => b.type === "practice").length, sub: `${totalP} lektioner`, icon: "🚗", accent: BLOCK_COLORS.practice.accent },
+          { label: "Selvstudium", value: blocks.filter(b => b.type === "selfStudy").length, sub: `${totalSS}/${MAX_SELF_STUDY_LESSONS} lektioner`, icon: "📚", accent: BLOCK_COLORS.selfStudy.accent },
+          { label: "I alt", value: totalAll, sub: `${blocks.length} blokke`, icon: "Σ", accent: t.badgeNeutralText },
         ].map(s => (
           <div key={s.label} style={{
-            background: "#111318", borderRadius: 10, padding: "14px 16px",
+            background: t.bgSurface, borderRadius: 10, padding: "14px 16px",
             border: `1px solid ${s.accent}22`, textAlign: "center",
           }}>
-            <div style={{ fontSize: 10, color: "#6B7280", marginBottom: 4 }}>{s.icon} {s.label}</div>
+            <div style={{ fontSize: 10, color: t.textMuted, marginBottom: 4 }}>{s.icon} {s.label}</div>
             <div style={{ fontSize: 24, fontWeight: 800, color: s.accent, fontFamily: "'DM Mono', monospace" }}>{s.value}</div>
-            <div style={{ fontSize: 10, color: "#4B5563", marginTop: 2 }}>{s.sub}</div>
+            <div style={{ fontSize: 10, color: t.textDim, marginTop: 2 }}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -2106,8 +2222,8 @@ function SummaryView({ blocks, moduleCounts, validation }) {
           const allOk = tOk && pOk;
           return (
             <div key={mod.id} style={{
-              background: allOk ? "#0A1C0D" : "#111318",
-              border: `1px solid ${allOk ? "#14532D" : mod.color + "33"}`,
+              background: allOk ? t.successBg : t.bgSurface,
+              border: `1px solid ${allOk ? t.successBorder : mod.color + "33"}`,
               borderRadius: 10, padding: "10px 12px",
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
@@ -2118,14 +2234,14 @@ function SummaryView({ blocks, moduleCounts, validation }) {
                 }}>{mod.id}</div>
                 <span style={{ fontSize: 11, fontWeight: 700, color: mod.color }}>{mod.title}</span>
               </div>
-              <div style={{ fontSize: 11, color: tOk ? "#86EFAC" : "#FCA5A5", marginBottom: 1 }}>
+              <div style={{ fontSize: 11, color: tOk ? t.successText : t.errorText, marginBottom: 1 }}>
                 📖 {tc}/{mod.theory}T {tOk ? "✓" : "✗"} {ss > 0 ? `(${ss} selvst.)` : ""}
               </div>
-              <div style={{ fontSize: 11, color: pOk ? "#86EFAC" : mod.practice === 0 ? "#4B5563" : "#FCA5A5" }}>
+              <div style={{ fontSize: 11, color: pOk ? t.successText : mod.practice === 0 ? t.textDim : t.errorText }}>
                 🚗 {pc}/{mod.practice}P {pOk ? "✓" : "✗"}
               </div>
               {mod.practiceNote && (
-                <div style={{ fontSize: 10, color: "#FCD34D", marginTop: 2 }}>⚠ {mod.practiceNote}</div>
+                <div style={{ fontSize: 10, color: t.badgeWarningText, marginTop: 2 }}>⚠ {mod.practiceNote}</div>
               )}
             </div>
           );
@@ -2135,14 +2251,14 @@ function SummaryView({ blocks, moduleCounts, validation }) {
       {/* Validation errors */}
       {hasErrors && (
         <div style={{
-          background: "#1C0A0A", border: "1px solid #7F1D1D", borderRadius: 10,
+          background: t.errorBg, border: `1px solid ${t.errorBorder}`, borderRadius: 10,
           padding: 16, marginBottom: 20,
         }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#FCA5A5", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: t.errorText, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
             Regelfejl
           </div>
           {validation.errors.map((e, i) => (
-            <div key={i} style={{ fontSize: 12, color: "#FCA5A5", marginBottom: 4, display: "flex", gap: 6, alignItems: "flex-start" }}>
+            <div key={i} style={{ fontSize: 12, color: t.errorText, marginBottom: 4, display: "flex", gap: 6, alignItems: "flex-start" }}>
               <span>❌</span><span>{e}</span>
             </div>
           ))}
@@ -2151,7 +2267,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
 
       {/* Full block timeline by module */}
       <div style={{
-        fontSize: 10, fontWeight: 700, color: "#4B5563", textTransform: "uppercase",
+        fontSize: 10, fontWeight: 700, color: t.textDim, textTransform: "uppercase",
         letterSpacing: "0.08em", marginBottom: 10,
       }}>
         Forløbsplan — alle blokke i rækkefølge
@@ -2159,8 +2275,8 @@ function SummaryView({ blocks, moduleCounts, validation }) {
 
       {blocks.length === 0 ? (
         <div style={{
-          padding: 40, textAlign: "center", color: "#4B5563",
-          border: "2px dashed #1A1F2E", borderRadius: 16, background: "#0D0F16",
+          padding: 40, textAlign: "center", color: t.textDim,
+          border: `2px dashed ${t.borderSubtle}`, borderRadius: 16, background: t.bgDeep,
         }}>
           <div style={{ fontSize: 24, marginBottom: 6 }}>📋</div>
           <div style={{ fontSize: 13 }}>Ingen blokke oprettet endnu. Gå til "Opbyg" for at starte.</div>
@@ -2207,7 +2323,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
                     fontSize: 12, fontWeight: 800, fontFamily: "'DM Mono', monospace",
                   }}>{modId}</div>
                   <span style={{ fontSize: 13, fontWeight: 700, color: mod.color }}>Modul {modId}: {mod.title}</span>
-                  <span style={{ fontSize: 11, color: "#6B7280", marginLeft: "auto" }}>
+                  <span style={{ fontSize: 11, color: t.textMuted, marginLeft: "auto" }}>
                     {mod.theory}T + {mod.practice}P krævet
                   </span>
                 </div>
@@ -2226,16 +2342,16 @@ function SummaryView({ blocks, moduleCounts, validation }) {
                           fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 800,
                           color: accent, background: accent + "22", padding: "2px 8px", borderRadius: 5,
                         }}>{globalIdx + 1}</span>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: "#E5E7EB" }}>{block.name}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: t.textPrimary }}>{block.name}</span>
                         <span className="badge" style={{ background: accent + "22", color: accent }}>
                           {typeIcon[block.type]} {typeLabel[block.type]}
                         </span>
-                        <span className="badge" style={{ background: "#1A1F2E", color: "#9CA3AF" }}>
+                        <span className="badge" style={{ background: t.bgElevated, color: t.badgeNeutralText }}>
                           {block.lessons}L
                         </span>
                       </div>
                       {block.items.length === 0 ? (
-                        <div style={{ fontSize: 11, color: "#4B5563", fontStyle: "italic" }}>Ingen mål tildelt</div>
+                        <div style={{ fontSize: 11, color: t.textDim, fontStyle: "italic" }}>Ingen mål tildelt</div>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                           {block.items.map(uid => {
@@ -2245,7 +2361,7 @@ function SummaryView({ blocks, moduleCounts, validation }) {
                             return (
                               <div key={uid} style={{
                                 display: "flex", alignItems: "center", gap: 6,
-                                fontSize: 11, color: "#D1D5DB", padding: "2px 0",
+                                fontSize: 11, color: t.textSecondary, padding: "2px 0",
                               }}>
                                 <span style={{
                                   fontFamily: "'DM Mono', monospace", fontSize: 10,
@@ -2253,8 +2369,8 @@ function SummaryView({ blocks, moduleCounts, validation }) {
                                 }}>{item.sectionId}</span>
                                 <span>{item.title}</span>
                                 <span className="badge" style={{
-                                  background: item.mode === "theory" ? "#1E3A5F" : "#14532D",
-                                  color: item.mode === "theory" ? "#93C5FD" : "#86EFAC",
+                                  background: item.mode === "theory" ? t.badgeTheoryBg : t.badgePracticeBg,
+                                  color: item.mode === "theory" ? t.badgeTheoryText : t.badgePracticeText,
                                   fontSize: 9, marginLeft: "auto",
                                 }}>{item.mode === "theory" ? "T" : "P"}</span>
                               </div>
@@ -2277,20 +2393,20 @@ function SummaryView({ blocks, moduleCounts, validation }) {
           marginTop: 20, display: "flex", gap: 12,
         }}>
           <div style={{
-            flex: 1, background: "#1C0F05", border: "1px solid #92400E44",
+            flex: 1, background: t.milestoneBg1, border: `1px solid ${t.milestoneBorder1}`,
             borderRadius: 10, padding: "14px 16px", textAlign: "center",
           }}>
             <div style={{ fontSize: 20, marginBottom: 4 }}>📝</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#FCD34D" }}>Teoriprøve</div>
-            <div style={{ fontSize: 10, color: "#6B7280", marginTop: 2 }}>Efter modul 1–4 gennemført</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: t.badgeWarningText }}>Teoriprøve</div>
+            <div style={{ fontSize: 10, color: t.textMuted, marginTop: 2 }}>Efter modul 1–4 gennemført</div>
           </div>
           <div style={{
-            flex: 1, background: "#0A1C0D", border: "1px solid #14532D",
+            flex: 1, background: t.milestoneBg2, border: `1px solid ${t.milestoneBorder2}`,
             borderRadius: 10, padding: "14px 16px", textAlign: "center",
           }}>
             <div style={{ fontSize: 20, marginBottom: 4 }}>🏁</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#86EFAC" }}>Praktisk prøve</div>
-            <div style={{ fontSize: 10, color: "#6B7280", marginTop: 2 }}>Alle 5 moduler + teoriprøve bestået</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: t.successText }}>Praktisk prøve</div>
+            <div style={{ fontSize: 10, color: t.textMuted, marginTop: 2 }}>Alle 5 moduler + teoriprøve bestået</div>
           </div>
         </div>
       )}
@@ -2302,11 +2418,11 @@ function SummaryView({ blocks, moduleCounts, validation }) {
 // POOL ITEM (left panel)
 // ─────────────────────────────────────────────────────────
 
-function PoolItem({ item, placed, onDragStart, onDragEnd, moduleColor, showGoals, toggleGoals, selected, onToggleSelect, isDraggingAlong, dragCount }) {
+function PoolItem({ item, placed, onDragStart, onDragEnd, moduleColor, showGoals, toggleGoals, selected, onToggleSelect, isDraggingAlong, dragCount, t }) {
   const isTheory = item.mode === "theory";
-  const bg = placed ? "#0D0F16" : selected ? "#1A1F2E" : (isTheory ? "#0F172A" : "#0B1A0F");
-  const border = placed ? "#1A1F2E" : selected ? "#60A5FA" : (isTheory ? "#1E3A5F" : "#14532D");
-  const textColor = placed ? "#4B5563" : "#E5E7EB";
+  const bg = placed ? t.bgDeep : selected ? t.bgElevated : (isTheory ? t.poolTheoryBg : t.poolPracticeBg);
+  const border = placed ? t.borderSubtle : selected ? "#60A5FA" : (isTheory ? t.poolTheoryBorder : t.poolPracticeBorder);
+  const textColor = placed ? t.textDim : t.textPrimary;
 
   return (
     <div style={{ marginBottom: 4, position: "relative" }}>
@@ -2346,11 +2462,11 @@ function PoolItem({ item, placed, onDragStart, onDragEnd, moduleColor, showGoals
             </span>
           </div>
           <div style={{ display: "flex", gap: 3, marginTop: 3, flexWrap: "wrap" }}>
-            {item.mustBeFirst && <span className="badge" style={{ background: "#7F1D1D", color: "#FCA5A5" }}>⚡ {item.mode === "practice" ? "Skal afholdes først (efter teorilektionen)" : "Skal afholdes først"}</span>}
-            {item.selfStudy && <span className="badge" style={{ background: "#3B0764", color: "#C4B5FD" }}>📚 Selvstudium</span>}
-            {item.context && <span className="badge" style={{ background: "#1F2937", color: "#9CA3AF" }}>{item.context}</span>}
-            {item.highlight && <span className="badge" style={{ background: "#422006", color: "#FCD34D" }}>{item.highlight}</span>}
-            {placed && <span className="badge" style={{ background: "#14532D", color: "#86EFAC" }}>✓ Placeret</span>}
+            {item.mustBeFirst && <span className="badge" style={{ background: t.errorBorder, color: t.errorText }}>⚡ Skal først</span>}
+            {item.selfStudy && <span className="badge" style={{ background: t.badgeSelfStudyBg, color: t.badgeSelfStudyText }}>📚 Selvstudium</span>}
+            {item.context && <span className="badge" style={{ background: t.badgeNeutralBg, color: t.badgeNeutralText }}>{item.context}</span>}
+            {item.highlight && <span className="badge" style={{ background: t.badgeWarningBg, color: t.badgeWarningText }}>{item.highlight}</span>}
+            {placed && <span className="badge" style={{ background: t.successBorder, color: t.successText }}>✓ Placeret</span>}
           </div>
         </div>
         {/* Multi-drag count badge */}
@@ -2365,7 +2481,7 @@ function PoolItem({ item, placed, onDragStart, onDragEnd, moduleColor, showGoals
         )}
         {!placed && item.goals.length > 0 && !dragCount && (
           <button onClick={(e) => { e.stopPropagation(); toggleGoals(item.uid); }} style={{
-            background: "none", border: "none", color: "#6B7280", cursor: "pointer", fontSize: 12, padding: "2px 4px",
+            background: "none", border: "none", color: t.textMuted, cursor: "pointer", fontSize: 12, padding: "2px 4px",
           }}>
             {showGoals[item.uid] ? "▲" : "▼"}
           </button>
@@ -2373,8 +2489,8 @@ function PoolItem({ item, placed, onDragStart, onDragEnd, moduleColor, showGoals
       </div>
       {showGoals[item.uid] && !placed && (
         <div style={{
-          padding: "6px 12px 8px 40px", fontSize: 11, color: "#9CA3AF", lineHeight: 1.6,
-          background: isTheory ? "#0C1222" : "#081310", borderRadius: "0 0 8px 8px",
+          padding: "6px 12px 8px 40px", fontSize: 11, color: t.badgeNeutralText, lineHeight: 1.6,
+          background: isTheory ? t.poolGoalsTheory : t.poolGoalsPractice, borderRadius: "0 0 8px 8px",
           marginTop: -4, borderLeft: `2px solid ${moduleColor}33`,
         }}>
           {item.goals.map((g, i) => (
@@ -2399,8 +2515,9 @@ function BlockCard({
   dragOverBlock, setDragOverBlock, dragItem,
   onDragStart, onDragEnd,
   onBlockDragStart, onBlockDragEnd, dragBlock,
+  t, theme,
 }) {
-  const colors = BLOCK_COLORS[block.type];
+  const colors = BLOCK_COLORS_BY_THEME[theme][block.type];
   const isDragOver = dragOverBlock === block.id && dragItem;
   const isBlockDragging = dragBlock === block.id;
   const isKTA = block.type === "practice" && block.items.some(uid => {
@@ -2489,8 +2606,8 @@ function BlockCard({
             }}
           />
           <span className="badge" style={{
-            background: block.type === "theory" ? "#1E3A5F" : block.type === "selfStudy" ? "#2E1A50" : "#14532D",
-            color: block.type === "theory" ? "#93C5FD" : block.type === "selfStudy" ? "#C4B5FD" : "#86EFAC",
+            background: block.type === "theory" ? t.badgeTheoryBg : block.type === "selfStudy" ? t.badgeSelfStudyBg : t.badgePracticeBg,
+            color: block.type === "theory" ? t.badgeTheoryText : block.type === "selfStudy" ? t.badgeSelfStudyText : t.badgePracticeText,
           }}>
             {block.type === "theory" ? "📖 Teori" : block.type === "selfStudy" ? "📚 Selvstudium" : "🚗 Praksis"}
           </span>
@@ -2498,7 +2615,7 @@ function BlockCard({
 
         {/* Lesson count */}
         <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-          <span style={{ fontSize: 11, color: "#6B7280" }}>Lektioner:</span>
+          <span style={{ fontSize: 11, color: t.textMuted }}>Lektioner:</span>
           <select
             value={block.lessons}
             onChange={(e) => onUpdateLessons(parseInt(e.target.value))}
@@ -2517,7 +2634,7 @@ function BlockCard({
         </div>
 
         <button className="btn" onClick={onRemove} style={{
-          background: "#7F1D1D44", color: "#FCA5A5", padding: "4px 8px", fontSize: 11,
+          background: t.deleteBg, color: t.deleteText, padding: "4px 8px", fontSize: 11,
         }}>✕</button>
       </div>
 
@@ -2527,12 +2644,12 @@ function BlockCard({
           <div
             onDragOver={handleEmptyDragOver}
             style={{
-              padding: 20, textAlign: "center", color: isDragOver ? colors.accent : "#4B5563",
+              padding: 20, textAlign: "center", color: isDragOver ? colors.accent : t.textDim,
               border: `1.5px dashed ${isDragOver ? colors.accent : colors.accent + "33"}`, borderRadius: 8,
               fontSize: 12, transition: "all 0.15s",
             }}
           >
-            Træk {block.type === "theory" ? "teorimål" : block.type === "selfStudy" ? "selvstudium-teorimål (afsnit 1, 3, 6, 9, 10)" : "praksismål"} hertil
+            Træk {block.type === "theory" ? "teorim\u00E5l" : block.type === "selfStudy" ? "selvstudium-teorim\u00E5l (afsnit 1, 3, 6, 9, 10)" : "praksism\u00E5l"} hertil
           </div>
         )}
         {block.items.map((uid, i) => {
@@ -2570,8 +2687,8 @@ function BlockCard({
                 style={{
                   display: "flex", alignItems: "center", gap: 8,
                   padding: "7px 10px", borderRadius: 7, marginBottom: 2,
-                  background: (wrongType || wrongSection) ? "#7F1D1D22" : colors.accent + "11",
-                  border: `1px solid ${(wrongType || wrongSection) ? "#7F1D1D" : colors.accent + "22"}`,
+                  background: (wrongType || wrongSection) ? t.errorBorder + "22" : colors.accent + "11",
+                  border: `1px solid ${(wrongType || wrongSection) ? t.errorBorder : colors.accent + "22"}`,
                   opacity: isBeingDragged ? 0.25 : 1,
                   transform: isBeingDragged ? "scale(0.97)" : "none",
                   transition: "opacity 0.15s, transform 0.15s",
@@ -2591,19 +2708,19 @@ function BlockCard({
                 <span style={{ fontSize: 12, fontWeight: 500, color: colors.text, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {item.title}
                 </span>
-                {wrongType && <span className="badge" style={{ background: "#7F1D1D", color: "#FCA5A5", fontSize: 9 }}>⚠ Forkert type</span>}
-                {wrongSection && <span className="badge" style={{ background: "#7F1D1D", color: "#FCA5A5", fontSize: 9 }}>⚠ Ikke tilladt</span>}
-                {item.selfStudy && <span className="badge" style={{ background: "#3B076422", color: "#C4B5FD", fontSize: 9 }}>📚</span>}
-                {item.mustBeFirst && <span style={{ fontSize: 10, color: "#FCA5A5", flexShrink: 0 }}>⚡</span>}
+                {wrongType && <span className="badge" style={{ background: t.errorBorder, color: t.errorText, fontSize: 9 }}>⚠ Forkert type</span>}
+                {wrongSection && <span className="badge" style={{ background: t.errorBorder, color: t.errorText, fontSize: 9 }}>⚠ Ikke tilladt</span>}
+                {item.selfStudy && <span className="badge" style={{ background: t.badgeSelfStudyBg + "22", color: t.badgeSelfStudyText, fontSize: 9 }}>📚</span>}
+                {item.mustBeFirst && <span style={{ fontSize: 10, color: t.errorText, flexShrink: 0 }}>⚡</span>}
                 <span className="badge" style={{
-                  background: item.mode === "theory" ? "#1E3A5F" : "#14532D",
-                  color: item.mode === "theory" ? "#93C5FD" : "#86EFAC",
+                  background: item.mode === "theory" ? t.badgeTheoryBg : t.badgePracticeBg,
+                  color: item.mode === "theory" ? t.badgeTheoryText : t.badgePracticeText,
                   fontSize: 9, flexShrink: 0,
                 }}>
                   {item.mode === "theory" ? "T" : "P"}
                 </span>
                 <button className="btn remove-btn" onClick={() => onRemoveItem(uid)} style={{
-                  background: "transparent", color: "#FCA5A5", padding: "2px 4px", fontSize: 10,
+                  background: "transparent", color: t.deleteText, padding: "2px 4px", fontSize: 10,
                 }} title="Fjern">✕</button>
               </div>
               {showGapAfter && (
