@@ -462,6 +462,8 @@ export default function Lektionsopbygger() {
   const blockIdCounter = useRef(1);
   // View mode: "build" or "summary"
   const [viewMode, setViewMode] = useState("build");
+  const [filterModule, setFilterModule] = useState("all");
+  const [filterType, setFilterType] = useState("all");
   // Multi-select for bulk move
   const [selectedUids, setSelectedUids] = useState(new Set());
   // Toast notifications
@@ -1916,6 +1918,7 @@ export default function Lektionsopbygger() {
 
               {/* Blocks */}
               {(() => {
+                const hiddenCount = blocks.length - filteredBlocks.length;
                 return (
                   <>
                     {hiddenCount > 0 && (
@@ -1925,7 +1928,7 @@ export default function Lektionsopbygger() {
                         fontSize: 11, color: t.textMuted, display: "flex", alignItems: "center", gap: 6,
                       }}>
                         <span>🔍</span>
-                        <span>Viser {filtered.length} af {blocks.length} blokke — {hiddenCount} skjult af filter</span>
+                        <span>Viser {filteredBlocks.length} af {blocks.length} blokke — {hiddenCount} skjult af filter</span>
                         <button className="btn" onClick={() => { setFilterModule("all"); setFilterType("all"); }} style={{
                           padding: "3px 8px", fontSize: 10, background: t.bgElevated, color: t.badgeNeutralText, marginLeft: "auto",
                         }}>Nulstil filter</button>
