@@ -1432,11 +1432,7 @@ export default function Lektionsopbygger() {
         .module-tab:hover { filter: brightness(${theme === "dark" ? "1.1" : "0.95"}); }
         .gradient-title {
           font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 2px;
-          background: ${t.headerGradient};
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          color: transparent;
+          color: #77a048;
         }
       `}</style>
 
@@ -1489,8 +1485,8 @@ export default function Lektionsopbygger() {
             <button className="btn" onClick={toggleTheme} style={{
               padding: "8px 14px", fontSize: 12, background: t.bgElevated, color: t.textSecondary,
               border: `1px solid ${t.border}`, display: "flex", alignItems: "center", gap: 6,
-            }} title={theme === "dark" ? "Skift til light mode" : "Skift til dark mode"}>
-              {theme === "dark" ? "☀️" : "🌙"} {theme === "dark" ? "Light" : "Dark"}
+            }} title={theme === "dark" ? "Skift til lys" : "Skift til mørk"}>
+              {theme === "dark" ? "☀️" : "🌙"} {theme === "dark" ? "Lys" : "Mørk"}
             </button>
 
             {/* Plan manager */}
