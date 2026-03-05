@@ -1859,11 +1859,11 @@ export default function Lektionsopbygger() {
                 <button className="btn" onClick={() => addBlock("theory")} style={{
                   padding: "10px 20px", fontSize: 13,
                   background: t.btnTheoryGrad, color: t.btnTheoryText,
-                }}>+ Teoriaften</button>
+                }}>+ Teori</button>
                 <button className="btn" onClick={() => addBlock("practice")} style={{
                   padding: "10px 20px", fontSize: 13,
                   background: t.btnPracticeGrad, color: t.btnPracticeText,
-                }}>+ Køretime</button>
+                }}>+ Kørsel</button>
                 <button className="btn" onClick={() => addBlock("selfStudy")} style={{
                   padding: "10px 20px", fontSize: 13,
                   background: t.btnSelfStudyGrad, color: t.btnSelfStudyText,
@@ -2116,14 +2116,15 @@ export default function Lektionsopbygger() {
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <span style={{ color: t.badgeTheoryText }}>📖 Teoriaften:</span> Max 4 lektioner/dag<br />
-                    <span style={{ color: t.badgePracticeText }}>🚗 Køretime:</span> Max 2 lektioner/dag (normal)<br />
-                    <span style={{ color: t.badgeWarningText }}>⭐ Motorvej/mørke/øvelsesplads:</span> Max 3 lektioner/dag<br />
-                    <span style={{ color: "#F472B6" }}>🏎️ KTA:</span> Max 4 lektioner/dag
+                    <span style={{ color: t.badgeTheoryText }}>📖 Teori:</span> Max 4 lektioner/dag<br />
+                    <span style={{ color: t.badgePracticeText }}>🚗 Kørsel:</span> Max 3 lektioner/dag (undtagen KTA)<br />
+                    <span style={{ color: t.badgeWarningText }}>⭐ Motorvej:</span> M\u00e5 k\u00f8re \u00e9n ekstra lektion (motorvejsk\u00f8rsel) efter KTA hvis undtaget for motorvejsk\u00f8rsel efter undervisningsplanen<br />
+                    <span style={{ color: "#F472B6" }}>🏎️ KTA:</span> Max 4 lektioner/dag<br />
+                    <span style={{ color: t.badgeNeutralText }}>📊 Samlet:</span> Max 8 lektioner p\u00e5 en dag
                   </div>
                   <div>
                     <span style={{ color: t.errorText }}>⚡ Rækkefølge:</span> Teori FØR praksis altid<br />
-                    <span style={{ color: t.errorText }}>⚡ M3 gate:</span> 7.1–7.8 praksis FØR kryds<br />
+                    <span style={{ color: t.errorText }}>⚡ M3 gate:</span> 7.1-7.3 og 7.6-7.8 praksis f\u00f8r 7.4 og 7.10-7.15 praksis<br />
                     <span style={{ color: t.badgeSelfStudyText }}>📚 Selvstudium:</span> Max 7 lektioner total<br />
                     <span style={{ color: t.badgeNeutralText }}>📅 Min. 14 undervisningsdage</span>
                   </div>
@@ -2201,7 +2202,7 @@ function SummaryView({ blocks, moduleCounts, validation, t, theme }) {
   });
 
   const typeIcon = { theory: "📖", practice: "🚗", selfStudy: "📚" };
-  const typeLabel = { theory: "Teoriaften", practice: "Køretime", selfStudy: "Selvstudium" };
+  const typeLabel = { theory: "Teori", practice: "Kørsel", selfStudy: "Selvstudium" };
   const typeBg = { theory: BLOCK_COLORS.theory.bg, practice: BLOCK_COLORS.practice.bg, selfStudy: BLOCK_COLORS.selfStudy.bg };
   const typeAccent = { theory: BLOCK_COLORS.theory.accent, practice: BLOCK_COLORS.practice.accent, selfStudy: BLOCK_COLORS.selfStudy.accent };
 
@@ -2230,8 +2231,8 @@ function SummaryView({ blocks, moduleCounts, validation, t, theme }) {
       {/* Overall stats grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 20 }}>
         {[
-          { label: "Teoriaftener", value: blocks.filter(b => b.type === "theory").length, sub: `${blocks.filter(b => b.type === "theory").reduce((s, b) => s + b.lessons, 0)} lektioner`, icon: "📖", accent: BLOCK_COLORS.theory.accent },
-          { label: "Køretimer", value: blocks.filter(b => b.type === "practice").length, sub: `${totalP} lektioner`, icon: "🚗", accent: BLOCK_COLORS.practice.accent },
+          { label: "Teori", value: blocks.filter(b => b.type === "theory").length, sub: `${blocks.filter(b => b.type === "theory").reduce((s, b) => s + b.lessons, 0)} lektioner`, icon: "📖", accent: BLOCK_COLORS.theory.accent },
+          { label: "Kørsel", value: blocks.filter(b => b.type === "practice").length, sub: `${totalP} lektioner`, icon: "🚗", accent: BLOCK_COLORS.practice.accent },
           { label: "Selvstudium", value: blocks.filter(b => b.type === "selfStudy").length, sub: `${totalSS}/${MAX_SELF_STUDY_LESSONS} lektioner`, icon: "📚", accent: BLOCK_COLORS.selfStudy.accent },
           { label: "I alt", value: totalAll, sub: `${blocks.length} blokke`, icon: "Σ", accent: t.badgeNeutralText },
         ].map(s => (
