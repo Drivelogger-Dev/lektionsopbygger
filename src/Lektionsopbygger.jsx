@@ -1364,30 +1364,30 @@ export default function Lektionsopbygger() {
   if (isMobile) {
     return (
       <div style={{
-        minHeight: "100vh", background: "#080B12", color: "#E5E7EB",
+        minHeight: "100vh", background: t.bgMain, color: t.textPrimary,
         fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif",
         display: "flex", alignItems: "center", justifyContent: "center",
         padding: 32,
       }}>
         <div style={{
-          background: "#111827", borderRadius: 16, padding: "40px 28px",
+          background: t.bgSurface, borderRadius: 16, padding: "40px 28px",
           textAlign: "center", maxWidth: 360, width: "100%",
-          border: "1px solid #1F2937", boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+          border: `1px solid ${t.border}`, boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
         }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🖥️</div>
           <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
             Kræver computer
           </h2>
-          <p style={{ fontSize: 14, color: "#9CA3AF", lineHeight: 1.6, marginBottom: 24 }}>
+          <p style={{ fontSize: 14, color: t.textMuted, lineHeight: 1.6, marginBottom: 24 }}>
             Forløbsplanlæggeren kan kun bruges på en computer med mus og tastatur.
           </p>
-          <p style={{ fontSize: 13, color: "#9CA3AF", marginBottom: 8 }}>
+          <p style={{ fontSize: 13, color: t.textMuted, marginBottom: 8 }}>
             Åbn linket på en computer:
           </p>
           <div
             style={{
-              background: "#1F2937", color: "#60A5FA",
-              border: "1px solid #374151", borderRadius: 10,
+              background: t.bgElevated, color: "#3B82F6",
+              border: `1px solid ${t.border}`, borderRadius: 10,
               padding: "12px 24px", fontSize: 14, fontWeight: 600,
               userSelect: "all", WebkitUserSelect: "all",
               width: "100%", boxSizing: "border-box",
@@ -1539,7 +1539,7 @@ export default function Lektionsopbygger() {
                               </div>
                             </div>
                             <button className="btn" onClick={(e) => renamePlan(name, e)} style={{
-                              padding: "3px 6px", fontSize: 10, background: "transparent", color: "#6B7280",
+                              padding: "3px 6px", fontSize: 10, background: "transparent", color: t.textMuted,
                             }} title="Omdøb">✏️</button>
                             <button className="btn" onClick={(e) => deletePlan(name, e)} style={{
                               padding: "3px 6px", fontSize: 10, background: "transparent", color: t.textMuted,
@@ -1550,7 +1550,7 @@ export default function Lektionsopbygger() {
                   </div>
                   {/* Reset */}
                   {blocks.length > 0 && (
-                    <div style={{ padding: "8px 14px", borderTop: "1px solid #1F2937" }}>
+                    <div style={{ padding: "8px 14px", borderTop: `1px solid ${t.borderSubtle}` }}>
                       <button className="btn" onClick={() => {
                         const unsaved = !currentPlanName || !savedPlans[currentPlanName] ||
                           JSON.stringify(savedPlans[currentPlanName].blocks) !== JSON.stringify(blocks);
@@ -1561,19 +1561,19 @@ export default function Lektionsopbygger() {
                         showToast("Alle blokke nulstillet", "info");
                       }} style={{
                         width: "100%", padding: "6px 10px", fontSize: 11,
-                        background: "#1A1F2E", color: "#9CA3AF", border: "1px solid #333",
+                        background: t.bgElevated, color: t.textMuted, border: `1px solid ${t.border}`,
                       }}>↺ Planlæg nyt forløb forfra</button>
                     </div>
                   )}
                   {/* Export / Import */}
-                  <div style={{ padding: "8px 14px", borderTop: "1px solid #1F2937", display: "flex", gap: 4 }}>
+                  <div style={{ padding: "8px 14px", borderTop: `1px solid ${t.borderSubtle}`, display: "flex", gap: 4 }}>
                     <button className="btn" onClick={exportPlan} disabled={blocks.length === 0} style={{
                       flex: 1, padding: "6px 10px", fontSize: 11,
-                      background: "#1A1F2E", color: blocks.length > 0 ? "#D1D5DB" : "#4B5563", border: "1px solid #333",
+                      background: t.bgElevated, color: blocks.length > 0 ? t.textSecondary : t.textDim, border: `1px solid ${t.border}`,
                     }}>📤 Eksportér .drivelogger</button>
                     <button className="btn" onClick={importPlan} style={{
                       flex: 1, padding: "6px 10px", fontSize: 11,
-                      background: "#1A1F2E", color: "#D1D5DB", border: "1px solid #333",
+                      background: t.bgElevated, color: t.textSecondary, border: `1px solid ${t.border}`,
                     }}>📥 Importér</button>
                   </div>
                 </div>
