@@ -1452,6 +1452,39 @@ export default function Lektionsopbygger() {
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {/* Fullscreen toggle */}
+            <div style={{ position: "relative" }}>
+              <button className="btn" onClick={() => {
+                if (document.fullscreenElement) document.exitFullscreen();
+                else { document.documentElement.requestFullscreen(); dismissFsHint(); }
+              }} style={{
+                padding: "8px 14px", fontSize: 12,
+                background: showFsHint ? t.badgeTheoryBg : t.bgElevated,
+                color: showFsHint ? t.badgeTheoryText : t.textSecondary,
+                border: `1px solid ${showFsHint ? t.badgeTheoryText : t.border}`,
+                transition: "all 0.3s",
+              }}>⛶ Fuld skærm</button>
+              {showFsHint && (
+                <div style={{
+                  position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)",
+                  marginTop: 8, background: t.badgeTheoryBg, border: `1px solid ${t.badgeTheoryText}`,
+                  borderRadius: 8, padding: "8px 12px", fontSize: 12, color: t.textSecondary,
+                  whiteSpace: "nowrap", zIndex: 999, boxShadow: t.shadowLight,
+                  display: "flex", alignItems: "center", gap: 8,
+                }}>
+                  <span>Tip: Prøv fuld skærm for bedre overblik</span>
+                  <button className="btn" onClick={dismissFsHint} style={{
+                    padding: "2px 6px", fontSize: 10, background: "transparent", color: t.textMuted,
+                  }}>✕</button>
+                  <div style={{
+                    position: "absolute", top: -5, left: "50%", transform: "translateX(-50%) rotate(45deg)",
+                    width: 10, height: 10, background: t.badgeTheoryBg,
+                    borderTop: `1px solid ${t.badgeTheoryText}`, borderLeft: `1px solid ${t.badgeTheoryText}`,
+                  }} />
+                </div>
+              )}
+            </div>
+
             {/* Theme toggle */}
             <button className="btn" onClick={toggleTheme} style={{
               padding: "8px 14px", fontSize: 12, background: t.bgElevated, color: t.textSecondary,
@@ -1584,6 +1617,11 @@ export default function Lektionsopbygger() {
               padding: "8px 14px", fontSize: 12, background: t.bgElevated, color: t.textSecondary,
               border: `1px solid ${t.border}`,
             }}>🖨 Eksportér</button>
+
+            <button className="btn" onClick={() => setViewMode(v => v === "summary" ? "build" : "summary")} style={{
+              padding: "8px 14px", fontSize: 12, background: t.bgElevated, color: t.badgeSelfStudyText,
+              border: `1px solid ${t.border}`, textDecoration: "none", display: "inline-flex", alignItems: "center",
+            }}>🧭 Forløbsoverblik</button>
 
             <button className="btn" onClick={() => setShowValidation(v => !v)} style={{
               padding: "8px 16px", fontSize: 12,
